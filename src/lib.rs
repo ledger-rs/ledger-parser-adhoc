@@ -1,4 +1,5 @@
 use global::GlobalScope;
+use session::Session;
 
 /**
  * Ledger parser library.
@@ -12,7 +13,9 @@ mod journal;
 mod session;
 
 pub fn parse() {
-    global::run();
+    // global::run();
+    let s = Session::new();
+    s.read_journal_files();
 }
 
 #[cfg(test)]

@@ -1,4 +1,4 @@
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 use crate::journal::Journal;
 
@@ -6,8 +6,18 @@ use crate::journal::Journal;
  * context.h
  */
 
-struct ParseContext {
-    pathname: Box<Path>,
-    current_directory: Box<Path>,
+pub(crate) struct ParseContext {
+    pathname: PathBuf,
+    current_directory: PathBuf,
     journal: Journal
+}
+
+pub(crate) struct ParseContextStack {
+    parsing_context: Vec<ParseContext>
+}
+
+impl ParseContextStack {
+    pub fn new() -> Self {
+        Self { parsing_context: vec![]  }
+    }
 }

@@ -1,0 +1,15 @@
+[package]
+name = "ledger-parser-adhoc"
+description=""
+version = "0.1.0"
+edition = "2021"
+authors = ["Alen Šiljak <dev@alensiljak.eu.org>"]
+license="AGPL-3.0"
+license-file = "LICENSE"
+repository = 'https://github.com/ledger-rs/ledger-parser-adhoc'
+categories = ['finance']
+keywords = ["library", "finance"]
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]

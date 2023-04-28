@@ -14,7 +14,7 @@ mod session;
 
 pub fn parse() {
     // global::run();
-    let s = Session::new();
+    let mut s = Session::new();
     s.read_journal_files();
 }
 

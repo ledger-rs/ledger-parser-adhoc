@@ -8,31 +8,32 @@ use crate::{account::Account, context::{ParseContext, ParseContextStack}, journa
 
 pub(crate) struct Session<'a> {
     pub data_files: Vec<PathBuf>,
-    pub journal: Journal,
+
+    pub journal: Box<Journal>,
     pub parsing_context: ParseContextStack<'a>,
 }
 
 impl <'a> Session<'a> {
     pub fn new() -> Self {
         Self {
-            journal: Journal::new(),
+            journal: Box::new(Journal::new()),
             data_files: vec![],
             parsing_context: ParseContextStack::new(),
         }
     }
 
-    pub(crate) fn read_journal_files(&'a self) -> &'a Journal {
+    pub(crate) fn read_journal_files(&'a mut self) -> &'a Journal {
         log::info!("Read journal file");
 
         let master_account: String = "".into();
 
         let count: usize = self.read_data(master_account);
 
-        &self.journal
+        todo!("&self.journal")
     }
 
     ///session.cc, line 72
-    fn read_data(&self, master_account: String) -> usize {
+    fn read_data(&'a mut self, master_account: String) -> usize {
         let populated_data_files = false;
         if self.data_files.is_empty() {
             // todo: get file paths
@@ -92,7 +93,7 @@ mod tests {
     Expenses:Food  20 EUR
     Assets:Cash
 "#;
-        let s = Session::new();
+        let mut s = Session::new();
         let actual = s.read_journal_files();
 
         assert!(false);

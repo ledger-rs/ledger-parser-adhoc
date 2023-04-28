@@ -54,7 +54,7 @@ mod tests {
     use super::Journal;
 
     #[test]
-    fn test_journal_parsing() {
+    fn test_journal_read() {
         let journal = Journal::new();
         let master = &Account::new();
         let mut context = ParseContextStack::new();

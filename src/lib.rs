@@ -11,6 +11,7 @@ mod context;
 mod global;
 mod journal;
 mod session;
+mod textual;
 
 pub fn parse() {
     // global::run();

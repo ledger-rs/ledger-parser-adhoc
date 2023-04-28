@@ -23,11 +23,11 @@ pub(crate) struct ParseContext<'path> {
     // linebuf
     // line_beg_pos
     // curr_pos
-    // linenum
-    // errors
-    // count
-    // sequence
-    // last
+    pub linenum: usize,
+    pub errors: usize,
+    pub count: usize,
+    pub sequence: usize,
+    pub last: String
 }
 
 impl<'path> ParseContext<'path> {
@@ -42,6 +42,11 @@ impl<'path> ParseContext<'path> {
             current_directory: cwd,
             journal,
             master,
+            linenum: 0,
+            errors: 0,
+            count: 0,
+            sequence: 0,
+            last: "".to_string(),
         }
     }
 

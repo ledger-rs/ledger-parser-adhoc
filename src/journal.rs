@@ -1,4 +1,4 @@
-use crate::{account::Account, context::{ParseContext, ParseContextStack}};
+use crate::{account::Account, context::{ParseContextStack, ParseContext}, textual::Instance};
 
 /**
  * journal.cc + journal.h
@@ -27,22 +27,23 @@ impl Journal {
         todo!()
     }
 
-    /// journal.cc, #469
-    pub fn read(&self, context: &ParseContextStack) -> usize {
+    /// journal.cc,
+    /// std::size_t journal_t::read(parse_context_stack_t &context)
+    pub fn read(&self, context_stack: &ParseContextStack) -> usize {
         let mut count: usize = 0;
 
-        read_textual()
+        count = read_textual(context_stack, context_stack.get_current());
+
+        count
     }
     
 }
 
 
-fn read_textual() -> usize {
-    parse()
-}
-
-fn parse() -> usize {
-    todo!()
+fn read_textual(context_stack: &ParseContextStack, context: &ParseContext) -> usize {
+    let instance: Instance = Instance::new(context_stack, context);
+    // instance.apply_stack...
+    instance.parse()
 }
 
 #[cfg(test)]

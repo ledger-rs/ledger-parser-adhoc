@@ -1,6 +1,6 @@
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
-use crate::{account::Account, context::{ParseContext, ParseContextStack}, journal::Journal};
+use crate::{account::Account, context::ParseContextStack, journal::Journal};
 
 /**
  * session.cc + session.h

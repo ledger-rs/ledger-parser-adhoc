@@ -11,19 +11,40 @@ pub(crate) struct Instance<'a> {
 }
 
 impl<'a> Instance<'a> {
-    pub fn new(context_stack: &'a ParseContextStack<'a>,
-        context: &'a ParseContext<'a>) -> Self {
+    pub fn new(context_stack: &'a ParseContextStack<'a>, context: &'a ParseContext<'a>) -> Self {
         Self {
             context_stack,
             context,
         }
     }
 
-    pub fn parse(&self) -> usize {
+    pub fn parse(&mut self) -> usize {
         log::info!("Parsing {:?}", self.context.pathname);
 
-        // todo: self.context.linenum
-        
+        // self.context.linenum = 0;
+
         todo!()
     }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::{
+        fs::File,
+        io::{BufRead, BufReader, Read},
+    };
+
+    /// Below is the example of efficient reading line-by-line
+    #[test]
+    fn read_file_example() {
+        let pathname = "tests/first.ledger";
+
+        let file = File::open(pathname).unwrap();
+        let reader = BufReader::new(file);
+        //file.read(buf_reader);
+        for line in reader.lines() {
+            println!("{}", line.expect("line read"));
+        }
+    }
+
 }

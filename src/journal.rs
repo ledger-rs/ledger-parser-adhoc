@@ -41,7 +41,7 @@ impl Journal {
 
 
 fn read_textual(context_stack: &ParseContextStack, context: &ParseContext) -> usize {
-    let instance: Instance = Instance::new(context_stack, context);
+    let mut instance: Instance = Instance::new(context_stack, context);
     // instance.apply_stack...
     instance.parse()
 }

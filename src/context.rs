@@ -53,15 +53,6 @@ impl<'path> ParseContext<'path> {
     pub fn open_for_reading(pathname: &PathBuf, cwd: &PathBuf) -> Self {
         // todo: get absolute filename
 
-        // Below is the example of efficient reading line-by-line:
-
-        // let file = File::open(pathname).unwrap();
-        // let buf_reader = BufReader::new(file);
-        // file.read(buf)
-        // for line in reader.lines() {
-        //     println!("{}", line?);
-        // }
-
         todo!()
     }
 }

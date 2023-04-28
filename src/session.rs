@@ -6,14 +6,13 @@ use crate::{account::Account, context::{ParseContext, ParseContextStack}, journa
  * session.cc + session.h
  */
 
-pub(crate) struct Session {
+pub(crate) struct Session<'a> {
     pub data_files: Vec<PathBuf>,
-
     pub journal: Journal,
-    pub parsing_context: ParseContextStack,
+    pub parsing_context: ParseContextStack<'a>,
 }
 
-impl Session {
+impl <'a> Session<'a> {
     pub fn new() -> Self {
         Self {
             journal: Journal::new(),
@@ -22,10 +21,10 @@ impl Session {
         }
     }
 
-    pub(crate) fn read_journal_files(&self) -> &Journal {
+    pub(crate) fn read_journal_files(&'a self) -> &'a Journal {
         log::info!("Read journal file");
 
-        let master_account: &str = "";
+        let master_account: String = "".into();
 
         let count: usize = self.read_data(master_account);
 
@@ -33,31 +32,43 @@ impl Session {
     }
 
     ///session.cc, line 72
-    fn read_data(mut self, master_account: &str) -> usize {
-        // todo: get file paths
+    fn read_data(&self, master_account: String) -> usize {
+        let populated_data_files = false;
+        if self.data_files.is_empty() {
+            // todo: get file paths
+
+        }
 
         let mut xact_count: usize = 0;
 
-        // let account: Account = if master_account.is_empty() {
-        //     self.journal.master
-        // } else {
-        //     self.journal.find_account(master_account)
-        // };
-        let account = &self.journal.master;
+        let account: &Account = if master_account.is_empty() {
+            &self.journal.master
+        } else {
+            // todo: check what the default parameter here is!
+            &self.journal.find_account(&master_account, true)
+        };
 
-        // price_db
+        // todo: price_db
+        // let price_db_path: PathBuf;
+        // todo: day_break
+        // todo: recursive_aliases
         // ...
         // check_payees
 
         // todo: load price db
+        // if price_db_path...
 
         for pathname in self.data_files.iter() {
-            // todo: handle - and stdin
+            // todo: handle "-" and "/dev/stdin"
+            // else
+            // self.parsing_context.push(pathname);
 
-            // todo: self.parsing_context.append(pathname);
-
-            // set journal
-            // set master
+            // todo: set journal
+            // self.parsing_context.get_current().journal = self.journal.get();
+            let journal = &self.journal;
+            // todo: set master
+            // self.parsing_context.get_current().ma
+            self.parsing_context.add_new(pathname, journal, &account);
 
             xact_count += self.journal.read(&self.parsing_context);
 
@@ -84,6 +95,7 @@ mod tests {
         let s = Session::new();
         let actual = s.read_journal_files();
 
-        assert_eq!(1, actual);
+        assert!(false);
+        // assert_eq!(1, actual);
     }
 }

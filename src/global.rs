@@ -4,11 +4,11 @@ use crate::session::Session;
  * global.cc
  */
 
-pub(crate) struct GlobalScope {
-    session_ptr: Box<Session>,
+pub(crate) struct GlobalScope<'a> {
+    session_ptr: Box<Session<'a>>,
 }
 
-impl GlobalScope {
+impl <'a> GlobalScope<'a> {
     pub fn new() -> Self {
         GlobalScope {
             session_ptr: Box::new(Session::new()),

@@ -38,8 +38,6 @@ pub fn parse<T: Read>(source: T) {
                 println!("content: {:?}", line);
 
                 // Remove the trailing newline characters
-                // line.pop()
-                // TODO: line.strip_suffix(suffix)
                 let clean_line = strip_trailing_newline(&line);
 
                 // use the read value
@@ -84,23 +82,58 @@ fn xact_directive(line: &str) {
 }
 
 fn parse_xact(line: &str) -> Xact {
-    let mut next_start: usize = 0;
-    let next_end = next_element(line, &next_start);
+    // let mut next_start: usize = 0;
+    let next = next_element(line, 0);
+    let mut next_index = match next {
+        Some(index) => index,
+        None => 0,
+    };
 
     // Parse the date
     let date = parse_date(line);
 
     if line.contains('=') {
-        // TODO: Parse the aux date
+        // TODO Parse the aux date
     }
 
-    // TODO: Parse the optional cleared flag: *
+    // TODO Parse the optional cleared flag: *
+    // if next.is_some() {}
 
     // Parse the optional code: (TEXT)
-    // TODO: Parse the description text
-    let payee = "";
+    // if next.is_some() && next == '(' {}
+
+    // Parse the description text
+    let mut payee = "<Unspecified payee>";
+    if next.is_some() && next_index < line.len() {
+        let mut pos = next_index;
+        let mut spaces: usize = 0;
+        let mut tabs: usize = 0;
+        // iterate further
+        for character in line.chars().skip(next_index) {
+            if character == ' ' {
+                spaces += 1;
+            } else if character == '\t' {
+                tabs += 1;
+            } else if character == ';' && (tabs > 0 || spaces > 1) {
+                todo!("complete")
+            } else {
+                spaces = 0;
+                tabs = 0;
+            }
+            pos += 1;
+        }
+        // xact->payee = context.journal->validate_payee(next);
+        payee = &line[next_index..];
+        // next = p;
+        next_index = pos;
+    } 
+
     // TODO: Parse the xact note
     let note = "";
+    if next.is_some() && next_index < line.len() {
+
+    }
+
     // TODO: Parse all of the posts associated with this xact
     // Tags
 
@@ -110,11 +143,11 @@ fn parse_xact(line: &str) -> Xact {
 /// Finds the start of the next text element.
 /// utils.h
 /// inline char * next_element(char * buf, bool variable = false)
-fn next_element(line: &str, start: &usize) -> Option<usize> {
+fn next_element(line: &str, start: usize) -> Option<usize> {
     let mut position: usize = 0;
 
     // iterate over the string
-    for p in line.char_indices().skip(*start) {
+    for p in line.char_indices().skip(start) {
         let character = p.1;
         if !(character == ' ' || character == '\t') {
             continue;
@@ -126,7 +159,7 @@ fn next_element(line: &str, start: &usize) -> Option<usize> {
         // }
     }
 
-    position
+    None
 }
 
 fn parse_date(line: &str) -> NaiveDate {
@@ -187,8 +220,9 @@ mod tests {
     fn test_finding_next_element() {
         let line = "2023-01-12 Supermarket";
 
-        let actual = next_element(line, &usize::MIN);
+        let actual = next_element(line, usize::MIN);
 
-        assert!(false);
+        // The next item (Supermarket) starts at index 11.
+        assert_eq!(Some(11), actual);
     }
 }

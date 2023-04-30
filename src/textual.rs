@@ -1,4 +1,4 @@
-use std::{io::BufReader, fs::File};
+use std::{fs::File, io::{BufReader, Read, BufRead}};
 
 use crate::context::{ParseContext, ParseContextStack};
 
@@ -19,7 +19,7 @@ impl<'a> Instance<'a> {
             context_stack,
             context,
             //reader: context.stream.get(),
-            reader: todo!()
+            reader: todo!(),
         }
     }
 
@@ -34,20 +34,61 @@ impl<'a> Instance<'a> {
     }
 
     fn read_next_directive(&self) {
-        self.read_line()
+        // todo: manage reading lines from files here.
+        // todo: let line = self.read_line();
+        let line = "some line";
+
+        // continuing in...
+        process_line(line);
     }
 
+    /// textual.cc
+    /// std::streamsize instance_t::read_line(char *&line)
     fn read_line(&self) {
-
+        // this reads a line into the passed pointer's variable
+        // and returns the length.
+        // In Rust, however, the pointer magic is not practical.
     }
+}
+
+fn read_source<T: Read>(source: T) {
+    // reader
+    let reader = BufReader::new(source);
+    for line_result in reader.lines() {
+        let line = line_result.expect("line read");
+        println!("line: {}", line);
+
+        process_line(&line);
+    }
+}
+
+/// Extracting the line processing logic here as the order of reading/processing
+/// will most-likely change in Rust, compared to the logic in C++.
+fn process_line(line: &str) {
+    let first_char = &line.chars().nth(0).expect("the first character");
+
+    // can't start with space?
+    let error_flag = !first_char.is_whitespace();
+
+    match first_char {
+        '\0' => println!("zero"),
+
+        ' ' | '\t' => todo!("continue"),
+
+        _ => println!("the rest"),
+    };
+
+    println!("complete");
 }
 
 #[cfg(test)]
 mod tests {
     use std::{
         fs::File,
-        io::{BufRead, BufReader},
+        io::{BufRead, BufReader, Cursor},
     };
+
+    use crate::textual::read_source;
 
     /// Below is the example of efficient reading line-by-line
     #[test]
@@ -63,14 +104,16 @@ mod tests {
     }
 
     #[test]
-    fn test_basic() {
+    fn basic_tx_test() {
         let tx_str = r#"
 2023-04-10 Supermarket
     Expenses:Food  20 EUR
     Assets:Cash
 "#;
 
+        let cursor = Cursor::new(tx_str);
+        read_source(cursor);
+
         todo!("parse text")
     }
-
 }

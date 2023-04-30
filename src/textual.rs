@@ -56,7 +56,7 @@ fn read_source<T: Read>(source: T) {
     let reader = BufReader::new(source);
     for line_result in reader.lines() {
         let line = line_result.expect("line read");
-        println!("line: {}", line);
+        // println!("line: {}", line);
 
         process_line(&line);
     }
@@ -65,20 +65,66 @@ fn read_source<T: Read>(source: T) {
 /// Extracting the line processing logic here as the order of reading/processing
 /// will most-likely change in Rust, compared to the logic in C++.
 fn process_line(line: &str) {
-    let first_char = &line.chars().nth(0).expect("the first character");
+    let len = line.len();
+    if len == 0 {
+        return;
+    }
 
-    // can't start with space?
+    let first_char = line.chars().nth(0).expect("the first character");
     let error_flag = !first_char.is_whitespace();
 
     match first_char {
         '\0' => println!("zero"),
 
-        ' ' | '\t' => todo!("continue"),
+        ' ' | '\t' => {
+            if !error_flag {
+                panic!("Unexpected whitespace at beginning of line");
+            }
+        },
 
-        _ => println!("the rest"),
+        // comments
+        ';' | '#' | '*' | '|' => {
+            // ignore
+        },
+
+        // option setting
+        '-' => {
+            todo!("option setting")
+        }
+
+        '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' => xact_directive(line, len),
+
+        // automated xact
+        '=' => todo!("automated xact"),
+
+        // period xact
+        '~' => todo!("period xact"),
+
+        '@' | '!' => {
+            // fall through, line++
+            todo!("increase the line then go down the default branch")
+        },
+
+        _ => {
+            // if !general_directive()
+            // the rest
+            todo!("the rest")
+        },
     };
 
     println!("complete");
+}
+
+fn xact_directive(line: &str, len: usize) {
+    // let xact = parse_xact(line, len, top_account());
+
+    // context.journal.add_xact(xact);
+    
+    todo!("complete")
+}
+
+fn parse_xact() {
+    todo!("complete")
 }
 
 #[cfg(test)]

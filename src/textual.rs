@@ -1,6 +1,12 @@
-use std::{fs::File, io::{BufReader, Read, BufRead}};
+use std::{
+    fs::File,
+    io::{BufRead, BufReader, Read},
+};
 
-use crate::context::{ParseContext, ParseContextStack};
+use crate::{
+    context::{ParseContext, ParseContextStack},
+    xact::Xact,
+};
 
 /**
  * textual.cc
@@ -51,12 +57,13 @@ impl<'a> Instance<'a> {
     }
 }
 
+/// Entry point.
+/// A File or a Cursor (for text) can be passed in to be parsed.
 fn read_source<T: Read>(source: T) {
     // reader
     let reader = BufReader::new(source);
     for line_result in reader.lines() {
         let line = line_result.expect("line read");
-        // println!("line: {}", line);
 
         process_line(&line);
     }
@@ -80,12 +87,12 @@ fn process_line(line: &str) {
             if !error_flag {
                 panic!("Unexpected whitespace at beginning of line");
             }
-        },
+        }
 
         // comments
         ';' | '#' | '*' | '|' => {
             // ignore
-        },
+        }
 
         // option setting
         '-' => {
@@ -103,13 +110,13 @@ fn process_line(line: &str) {
         '@' | '!' => {
             // fall through, line++
             todo!("increase the line then go down the default branch")
-        },
+        }
 
         _ => {
             // if !general_directive()
             // the rest
             todo!("the rest")
-        },
+        }
     };
 
     println!("complete");
@@ -117,13 +124,62 @@ fn process_line(line: &str) {
 
 fn xact_directive(line: &str, len: usize) {
     // let xact = parse_xact(line, len, top_account());
+    let xact = parse_xact(line);
 
     // context.journal.add_xact(xact);
-    
+
     todo!("complete")
 }
 
-fn parse_xact() {
+fn parse_xact(line: &str) {
+    let mut xact = Xact::new(None, "".into(), None);
+
+    // date
+
+    let next = next_element(line);
+    // todo: skip whitespace
+
+    // Locate first occurrence of character in string
+    //let next = line.find('=');
+
+    todo!("complete")
+}
+
+/// utils.h
+/// inline char * next_element(char * buf, bool variable = false)
+/// Get the next element to work with.
+fn next_element(line: &str) -> usize {
+    // variable = false
+    for p in line.chars() {
+        if !(p == ' ' || p == '\t') {
+            continue;
+        }
+
+        // todo: if !variable {
+        //return skip_ws(line);
+        // }
+    }
+
+    todo!("complete")
+}
+
+fn skip_ws(line: &str, pos: usize) -> usize {
+    // let start = pos;
+    // let end = line.len();
+
+    // for p in [start..end] {
+    //     println!("yo {:?}", p);
+    // }
+
+    // nth() consumes characters
+    // while let char = line.chars().nth(0) {
+    //     println!("char: {:?}", char);
+    // }
+
+    // https://doc.rust-lang.org/book/ch08-02-strings.html#indexing-into-strings
+
+    // line.chars();
+
     todo!("complete")
 }
 
@@ -161,5 +217,21 @@ mod tests {
         read_source(cursor);
 
         todo!("parse text")
+    }
+
+    #[test]
+    fn test_char_iteration() {
+        let string = "Hello";
+        let mut iterator = string.chars();
+
+        let third = iterator.nth(2);
+        println!("third: {:?}", third);
+        let second = iterator.nth(1);
+        println!("second: {:?}", second);
+
+        println!("second iterator, third = {:?}", string.chars().nth(2));
+        
+        println!("string after nth: {:?}", string);
+        println!("chars: {:?}", string.chars());
     }
 }

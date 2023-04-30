@@ -12,6 +12,7 @@ mod global;
 mod journal;
 mod session;
 mod textual;
+mod xact;
 
 pub fn parse() {
     // global::run();

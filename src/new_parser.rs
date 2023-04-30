@@ -1,15 +1,13 @@
 /**
- * This parser is created from scratch, using Rust's concepts, instead of trying to 
+ * This parser is created from scratch, using Rust's concepts, instead of trying to
  * map C++ constructs onto Rust.
  * Issues with pointers for the model structure, as well as parsing files and strings
  * seem beter suited to be re-implemented anew.
  */
-
 // todo: get the list of files to parse
 
 // todo: generate a stream (or Read?), which can be text or File.
-
-use std::io::{Read, BufReader, BufRead};
+use std::io::{BufRead, BufReader, Read};
 
 /// Entry point.
 /// A File or a Cursor (for text) can be passed in to be parsed.
@@ -17,29 +15,35 @@ fn parse<T: Read>(source: T) {
     // reader
     let mut reader = BufReader::new(source);
     // for line_result in reader.lines() {
-    //     let line = line_result.expect("line read");
-
-    //     //process_line(&line);
-    // }
 
     // To avoid allocation, read line by line.
     let mut line = String::new();
-    match reader.read_line(&mut line) {
-        Ok(num_bytes) => {
-            println!("read {:?} bytes.", num_bytes);
-            println!("content: {:?}", line);
-        },
-        Err(err) => {
-            // end of file?
-            println!("error: {:?}", err);
-        },
+    loop {
+        match reader.read_line(&mut line) {
+            Err(err) => {
+                println!("Error: {:?}", err);
+                break;
+            }
+            Ok(0) => {
+                // end of file?
+                println!("End of file");
+                break;
+            }
+            Ok(num_bytes) => {
+                print!("read {:?} bytes, ", num_bytes);
+                println!("content: {:?}", line);
+
+                // todo: use the read value
+
+                // clear the buffer before reading the next line.
+                line.clear();
+            }
+        }
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use std::io::Cursor;
-
     use crate::new_parser::parse;
 
     #[test]
@@ -53,10 +57,9 @@ mod tests {
 
         // Cursor already implements BufReader!
         //let cursor = Cursor::new(tx_str);
-                
+
         parse(tx_str.as_bytes());
 
         assert!(false);
     }
-
 }

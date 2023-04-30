@@ -57,18 +57,6 @@ impl<'a> Instance<'a> {
     }
 }
 
-/// Entry point.
-/// A File or a Cursor (for text) can be passed in to be parsed.
-fn read_source<T: Read>(source: T) {
-    // reader
-    let reader = BufReader::new(source);
-    for line_result in reader.lines() {
-        let line = line_result.expect("line read");
-
-        process_line(&line);
-    }
-}
-
 /// Extracting the line processing logic here as the order of reading/processing
 /// will most-likely change in Rust, compared to the logic in C++.
 fn process_line(line: &str) {
@@ -190,8 +178,6 @@ mod tests {
         io::{BufRead, BufReader, Cursor},
     };
 
-    use crate::textual::read_source;
-
     /// Below is the example of efficient reading line-by-line
     #[test]
     fn read_file_example() {
@@ -203,20 +189,6 @@ mod tests {
         for line in reader.lines() {
             println!("{}", line.expect("line read"));
         }
-    }
-
-    #[test]
-    fn basic_tx_test() {
-        let tx_str = r#"
-2023-04-10 Supermarket
-    Expenses:Food  20 EUR
-    Assets:Cash
-"#;
-
-        let cursor = Cursor::new(tx_str);
-        read_source(cursor);
-
-        todo!("parse text")
     }
 
     #[test]

@@ -10,6 +10,7 @@ mod account;
 mod context;
 mod global;
 mod journal;
+mod new_parser;
 mod session;
 mod textual;
 mod xact;

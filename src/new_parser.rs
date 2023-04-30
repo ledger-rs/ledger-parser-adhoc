@@ -122,19 +122,21 @@ fn parse_xact(line: &str) -> Xact {
             }
             pos += 1;
         }
+        // TODO: validate payee
         // xact->payee = context.journal->validate_payee(next);
         payee = &line[next_index..];
         // next = p;
         next_index = pos;
     } 
 
-    // TODO: Parse the xact note
+    // Parse the xact note
     let note = "";
-    if next.is_some() && next_index < line.len() {
-
+    if next.is_some() && next_index < line.len() && line.chars().skip(next_index).next() == Some(';') {
+        todo!("append note")
     }
 
     // TODO: Parse all of the posts associated with this xact
+
     // Tags
 
     Xact::new(Some(date), payee, Some(note))

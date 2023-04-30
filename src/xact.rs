@@ -20,17 +20,21 @@ pub(crate) struct Xact<'a> {
 
     // state
     // date: Option<Date>
-    // date_aux: 
-    note: Option<&'a str>
-    // pos: Option<Position>
-    // metadata: Option<string_map>
+    // date_aux:
+    note: Option<&'a str>, // pos: Option<Position>
+                           // metadata: Option<string_map>
 }
 
-impl <'a> Xact<'a> {
-    pub fn new(date: Option<NaiveDate>, payee: &str, note: Option<&str>) -> Self {
+impl<'a> Xact<'a> {
+    pub fn new(date: Option<NaiveDate>, payee: &'a str, note: Option<&'a str>) -> Self {
         // code: Option<String>
 
-        Self { payee, note, posts: vec![], date }
+        Self {
+            payee,
+            note,
+            posts: vec![],
+            date,
+        }
     }
 
     pub fn add_post() {

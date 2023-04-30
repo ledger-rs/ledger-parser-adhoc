@@ -84,7 +84,8 @@ fn xact_directive(line: &str) {
 }
 
 fn parse_xact(line: &str) -> Xact {
-    let (next_start, next_end) = next_element(line);
+    let mut next_start: usize = 0;
+    let next_end = next_element(line, &next_start);
 
     // Parse the date
     let date = parse_date(line);
@@ -106,16 +107,26 @@ fn parse_xact(line: &str) -> Xact {
     Xact::new(Some(date), payee, Some(note))
 }
 
-/// Finds the boundaries of the next text element.
-fn next_element(line: &str) -> usize {
-    let location: usize;
+/// Finds the start of the next text element.
+/// utils.h
+/// inline char * next_element(char * buf, bool variable = false)
+fn next_element(line: &str, start: &usize) -> Option<usize> {
+    let mut position: usize = 0;
 
     // iterate over the string
-    for p in line.chars() {
+    for p in line.char_indices().skip(*start) {
+        let character = p.1;
+        if !(character == ' ' || character == '\t') {
+            continue;
+        }
 
+        // if !variable {
+            position = p.0 + 1;
+            return skip_ws(line, &position);
+        // }
     }
 
-    location
+    position
 }
 
 fn parse_date(line: &str) -> NaiveDate {
@@ -137,9 +148,23 @@ fn strip_trailing_newline(input: &str) -> &str {
         .unwrap_or(input)
 }
 
+/// Starts iterating through the string at the given location,
+/// skips the whitespace and returns the location of the next element.
+fn skip_ws(line: &str, start: &usize) -> Option<usize> {
+    for p in line.char_indices().skip(*start) {
+        let character = p.1;
+        while character == ' ' || character == '\t' || character == '\n' {
+            continue;
+        }
+        return Some(p.0)
+    }
+
+    return None
+}
+
 #[cfg(test)]
 mod tests {
-    use crate::new_parser::parse;
+    use crate::new_parser::{parse, next_element};
 
     #[test]
     fn basic_tx_test() {
@@ -154,6 +179,15 @@ mod tests {
         //let cursor = Cursor::new(tx_str);
 
         parse(tx_str.as_bytes());
+
+        assert!(false);
+    }
+
+    #[test]
+    fn test_finding_next_element() {
+        let line = "2023-01-12 Supermarket";
+
+        let actual = next_element(line, &usize::MIN);
 
         assert!(false);
     }

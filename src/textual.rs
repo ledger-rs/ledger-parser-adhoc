@@ -1,6 +1,6 @@
 use std::{
     fs::File,
-    io::{BufRead, BufReader, Read},
+    io::BufReader,
 };
 
 use crate::{
@@ -69,7 +69,7 @@ fn process_line(line: &str) {
     let error_flag = !first_char.is_whitespace();
 
     match first_char {
-        '\0' => println!("zero"),
+        // '\0' => println!("zero"),
 
         ' ' | '\t' => {
             if !error_flag {
@@ -120,7 +120,7 @@ fn xact_directive(line: &str, len: usize) {
 }
 
 fn parse_xact(line: &str) {
-    let mut xact = Xact::new(None, "".into(), None);
+    // let mut xact = Xact::new("".into(), None);
 
     // date
 
@@ -175,7 +175,7 @@ fn skip_ws(line: &str, pos: usize) -> usize {
 mod tests {
     use std::{
         fs::File,
-        io::{BufRead, BufReader, Cursor},
+        io::{BufRead, BufReader},
     };
 
     /// Below is the example of efficient reading line-by-line

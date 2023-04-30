@@ -7,10 +7,13 @@ use session::Session;
  */
 
 mod account;
+mod amount;
+mod commodity;
 mod context;
 mod global;
 mod journal;
 mod new_parser;
+mod post;
 mod session;
 mod textual;
 mod xact;

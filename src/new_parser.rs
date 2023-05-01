@@ -13,12 +13,12 @@ use chrono::NaiveDate;
 
 use crate::xact::Xact;
 
-struct NewParser<'a> {
+struct NewParser {
     is_parsing_xact: bool,
-    xact: Option<Xact<'a>>,
+    xact: Option<Xact>,
 }
 
-impl <'a> NewParser<'a> {
+impl NewParser {
     pub fn new() -> Self {
         Self { is_parsing_xact: false, xact: None }
     }
@@ -32,7 +32,6 @@ impl <'a> NewParser<'a> {
 
         // To avoid allocation, reuse the String variable.
         let mut line = String::new();
-
         loop {
             match reader.read_line(&mut line) {
                 Err(err) => {
@@ -49,7 +48,8 @@ impl <'a> NewParser<'a> {
                     // println!("content: {:?}", line);
 
                     // Remove the trailing newline characters
-                    let clean_line = strip_trailing_newline(&line);
+                    // let clean_line = strip_trailing_newline(&line);
+                    let clean_line = &line.trim_end();
 
                     // use the read value
                     self.parse_line(&clean_line);
@@ -65,7 +65,7 @@ impl <'a> NewParser<'a> {
 
     /// textual.cc
     /// void instance_t::read_next_directive(bool &error_flag)
-    fn parse_line(&mut self, line: &'a str) {
+    fn parse_line(&mut self, line: &str) {
         let len = line.len();
         if len == 0 {
             if self.is_parsing_xact {
@@ -104,7 +104,7 @@ impl <'a> NewParser<'a> {
         }
     }
 
-    fn xact_directive(&mut self, line: &'a str) {
+    fn xact_directive(&mut self, line: &str) {
         let xact = parse_xact(line);
     
         self.xact = Some(xact);
@@ -136,7 +136,7 @@ fn parse_xact(line: &str) -> Xact {
     // if next.is_some() && next == '(' {}
 
     // Parse the description text
-    let mut payee = "<Unspecified payee>";
+    let mut payee = "<Unspecified payee>".to_owned();
     if next.is_some() && next_index < line.len() {
         let mut pos = next_index;
         let mut spaces: usize = 0;
@@ -157,13 +157,13 @@ fn parse_xact(line: &str) -> Xact {
         }
         // TODO: validate payee
         // xact->payee = context.journal->validate_payee(next);
-        payee = &line[next_index..];
+        payee = line[next_index..].into();
         // next = p;
         next_index = pos;
     }
 
     // Parse the xact note
-    let note = "";
+    let note = "".to_string();
     if next.is_some()
         && next_index < line.len()
         && line.chars().skip(next_index).next() == Some(';')

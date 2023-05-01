@@ -4,9 +4,9 @@ use crate::{xact::Xact, account::Account, amount::Amount};
  * posts.h + posts.cc
  */
 
-pub struct Post<'a> {
-    xact: &'a Xact<'a>,
-    account: &'a Account,
+pub struct Post {
+    // xact: &Xact,
+    // account: &Account,
 
     amount: Amount,
     // amount_expr

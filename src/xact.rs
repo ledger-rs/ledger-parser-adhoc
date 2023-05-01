@@ -6,27 +6,27 @@ use crate::post::Post;
  * xact.cc
  */
 
-pub(crate) struct Xact<'a> {
+pub(crate) struct Xact {
     // Item
     date: Option<NaiveDate>,
     // date_aux
 
     // Xact base
     // journal
-    posts: Vec<Post<'a>>,
+    posts: Vec<Post>,
 
     // code: Option<String>,
-    payee: &'a str,
+    payee: String,
 
     // state
     // date: Option<Date>
     // date_aux:
-    note: Option<&'a str>, // pos: Option<Position>
+    note: Option<String>, // pos: Option<Position>
                            // metadata: Option<string_map>
 }
 
-impl<'a> Xact<'a> {
-    pub fn new(date: Option<NaiveDate>, payee: &'a str, note: Option<&'a str>) -> Self {
+impl Xact {
+    pub fn new(date: Option<NaiveDate>, payee: String, note: Option<String>) -> Self {
         // code: Option<String>
 
         Self {

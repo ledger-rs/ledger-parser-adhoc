@@ -13,89 +13,105 @@ use chrono::NaiveDate;
 
 use crate::xact::Xact;
 
-struct Context {
+struct NewParser<'a> {
     is_parsing_xact: bool,
+    xact: Option<Xact<'a>>,
 }
 
-impl Context {
+impl <'a> NewParser<'a> {
     pub fn new() -> Self {
-        Self { is_parsing_xact: false }
+        Self { is_parsing_xact: false, xact: None }
     }
-}
 
-/// Entry point.
-/// A File or a Cursor (for text) can be passed in to be parsed.
-pub fn parse<T: Read>(source: T) {
-    // reader
-    let mut reader = BufReader::new(source);
-    // for line_result in reader.lines() {
+    /// Entry point.
+    /// A File or a Cursor (for text) can be passed in to be parsed.
+    pub fn parse<T: Read>(&mut self, source: T) {
+        // reader
+        let mut reader = BufReader::new(source);
+        // for line_result in reader.lines() {
 
-    // To avoid allocation, reuse the String variable.
-    let mut line = String::new();
-    let mut context = Context::new();
-    loop {
-        match reader.read_line(&mut line) {
-            Err(err) => {
-                println!("Error: {:?}", err);
-                break;
+        // To avoid allocation, reuse the String variable.
+        let mut line = String::new();
+
+        loop {
+            match reader.read_line(&mut line) {
+                Err(err) => {
+                    println!("Error: {:?}", err);
+                    break;
+                }
+                Ok(0) => {
+                    // end of file?
+                    println!("End of file");
+                    break;
+                }
+                Ok(num_bytes) => {
+                    // print!("read {:?} bytes, ", num_bytes);
+                    // println!("content: {:?}", line);
+
+                    // Remove the trailing newline characters
+                    let clean_line = strip_trailing_newline(&line);
+
+                    // use the read value
+                    self.parse_line(&clean_line);
+
+                    // clear the buffer before reading the next line.
+                    line.clear();
+                }
             }
-            Ok(0) => {
-                // end of file?
-                println!("End of file");
-                break;
+        }
+
+        todo!("Return the result")
+    }
+
+    /// textual.cc
+    /// void instance_t::read_next_directive(bool &error_flag)
+    fn parse_line(&mut self, line: &'a str) {
+        let len = line.len();
+        if len == 0 {
+            if self.is_parsing_xact {
+                // An empty line is a separator between transactions.
+                self.is_parsing_xact = false;
+                todo!("finalize the transaction")
             }
-            Ok(num_bytes) => {
-                // print!("read {:?} bytes, ", num_bytes);
-                // println!("content: {:?}", line);
 
-                // Remove the trailing newline characters
-                let clean_line = strip_trailing_newline(&line);
+            return;
+        }
 
-                // use the read value
-                read_next_directive(&mut context, &clean_line);
+        let first_char = line.chars().nth(0).expect("first character");
+        match first_char {
+            // comments
+            ';' | '#' | '*' | '|' => {
+                // ignore
+            }
 
-                // clear the buffer before reading the next line.
-                line.clear();
+            '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' => {
+                self.xact_directive(line)
+            }
+
+            ' ' | '\t' => {
+                if self.is_parsing_xact {
+                    todo!("parse posting")
+                } else {
+                    panic!("Unexpected whitespace at beginning of line");
+                }
+            }
+
+            _ => {
+                // if !general_directive()
+                // the rest
+                todo!("the rest")
             }
         }
     }
-}
 
-/// textual.cc
-/// void instance_t::read_next_directive(bool &error_flag)
-fn read_next_directive(context: &mut Context, line: &str) {
-    let len = line.len();
-    if len == 0 {
-        if context.is_parsing_xact {
-            // An empty line is a separator between transactions.
-            context.is_parsing_xact = false;
-            todo!("finalize the transaction")
-        }
-        
-        return;
+    fn xact_directive(&mut self, line: &'a str) {
+        let xact = parse_xact(line);
+    
+        self.xact = Some(xact);
+    
+        todo!("add xact to journal");
     }
-
-    let first_char = line.chars().nth(0).expect("first character");
-    match first_char {
-        // comments
-        ';' | '#' | '*' | '|' => {
-            // ignore
-        }
-
-        '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' => xact_directive(line),
-
-        _ => {
-            // if !general_directive()
-            // the rest
-            todo!("the rest")
-        }
-    }
-}
-
-fn xact_directive(line: &str) {
-    let xact = parse_xact(line);
-
-    todo!("add xact to journal");
+    
 }
 
 fn parse_xact(line: &str) -> Xact {
@@ -144,11 +160,14 @@ fn parse_xact(line: &str) -> Xact {
         payee = &line[next_index..];
         // next = p;
         next_index = pos;
-    } 
+    }
 
     // Parse the xact note
     let note = "";
-    if next.is_some() && next_index < line.len() && line.chars().skip(next_index).next() == Some(';') {
+    if next.is_some()
+        && next_index < line.len()
+        && line.chars().skip(next_index).next() == Some(';')
+    {
         todo!("append note")
     }
 
@@ -173,8 +192,8 @@ fn next_element(line: &str, start: usize) -> Option<usize> {
         }
 
         // if !variable {
-            position = p.0 + 1;
-            return skip_ws(line, &position);
+        position = p.0 + 1;
+        return skip_ws(line, &position);
         // }
     }
 
@@ -187,8 +206,7 @@ fn parse_date(line: &str) -> NaiveDate {
     let date_str = &line[0..ws_index];
 
     // todo: support more date formats?
-    let date = NaiveDate::parse_from_str(date_str, "%Y-%m-%d")
-        .expect("date parsed");
+    let date = NaiveDate::parse_from_str(date_str, "%Y-%m-%d").expect("date parsed");
 
     date
 }
@@ -208,15 +226,15 @@ fn skip_ws(line: &str, start: &usize) -> Option<usize> {
         while character == ' ' || character == '\t' || character == '\n' {
             continue;
         }
-        return Some(p.0)
+        return Some(p.0);
     }
 
-    return None
+    return None;
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::new_parser::{parse, next_element};
+    use crate::new_parser::{next_element, NewParser};
 
     #[test]
     fn basic_tx_test() {
@@ -230,7 +248,8 @@ mod tests {
         // Cursor already implements BufReader!
         //let cursor = Cursor::new(tx_str);
 
-        parse(tx_str.as_bytes());
+        let mut parser = NewParser::new();
+        parser.parse(tx_str.as_bytes());
 
         assert!(false);
     }

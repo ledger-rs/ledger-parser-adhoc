@@ -1,4 +1,3 @@
-use global::GlobalScope;
 use session::Session;
 
 /**

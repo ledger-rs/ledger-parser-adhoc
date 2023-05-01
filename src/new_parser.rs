@@ -13,6 +13,16 @@ use chrono::NaiveDate;
 
 use crate::xact::Xact;
 
+struct Context {
+    is_parsing_xact: bool,
+}
+
+impl Context {
+    pub fn new() -> Self {
+        Self { is_parsing_xact: false }
+    }
+}
+
 /// Entry point.
 /// A File or a Cursor (for text) can be passed in to be parsed.
 pub fn parse<T: Read>(source: T) {
@@ -20,8 +30,9 @@ pub fn parse<T: Read>(source: T) {
     let mut reader = BufReader::new(source);
     // for line_result in reader.lines() {
 
-    // To avoid allocation, read line by line.
+    // To avoid allocation, reuse the String variable.
     let mut line = String::new();
+    let mut context = Context::new();
     loop {
         match reader.read_line(&mut line) {
             Err(err) => {
@@ -34,14 +45,14 @@ pub fn parse<T: Read>(source: T) {
                 break;
             }
             Ok(num_bytes) => {
-                print!("read {:?} bytes, ", num_bytes);
-                println!("content: {:?}", line);
+                // print!("read {:?} bytes, ", num_bytes);
+                // println!("content: {:?}", line);
 
                 // Remove the trailing newline characters
                 let clean_line = strip_trailing_newline(&line);
 
                 // use the read value
-                read_next_directive(&clean_line);
+                read_next_directive(&mut context, &clean_line);
 
                 // clear the buffer before reading the next line.
                 line.clear();
@@ -52,9 +63,15 @@ pub fn parse<T: Read>(source: T) {
 
 /// textual.cc
 /// void instance_t::read_next_directive(bool &error_flag)
-fn read_next_directive(line: &str) {
+fn read_next_directive(context: &mut Context, line: &str) {
     let len = line.len();
     if len == 0 {
+        if context.is_parsing_xact {
+            // An empty line is a separator between transactions.
+            context.is_parsing_xact = false;
+            todo!("finalize the transaction")
+        }
+        
         return;
     }
 

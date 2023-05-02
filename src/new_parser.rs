@@ -11,7 +11,7 @@ use std::io::{BufRead, BufReader, Read};
 
 use chrono::NaiveDate;
 
-use crate::xact::Xact;
+use crate::{xact::Xact, post::Post};
 
 enum LineParseResult {
     Comment,
@@ -85,13 +85,12 @@ fn parse_line(context: &mut ParsingContext, line: &str) -> LineParseResult {
         }
 
         '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' => {
-            let xact = parse_xact(line);
-            LineParseResult::Xact(xact)
+            return parse_xact(line);
         }
 
         ' ' | '\t' => {
             if context.xact.is_some() {
-                todo!("parse posting")
+                return parse_xact_content(line);
             } else {
                 panic!("Unexpected whitespace at beginning of line");
             }
@@ -128,9 +127,9 @@ fn process_parsed_element(context: &mut ParsingContext, parse_result: LineParseR
     }
 }
 
-fn parse_xact(line: &str) -> Xact {
+fn parse_xact(line: &str) -> LineParseResult {
     // let mut next_start: usize = 0;
-    let next = next_element(line, 0);
+    let next = next_element(line, 0, false);
     let mut next_index = match next {
         Some(index) => index,
         None => 0,
@@ -189,14 +188,16 @@ fn parse_xact(line: &str) -> Xact {
 
     // Tags
 
-    Xact::new(Some(date), payee, Some(note))
+    let xact = Xact::new(Some(date), payee, Some(note));
+    LineParseResult::Xact(xact)
 }
 
 /// Finds the start of the next text element.
 /// utils.h
 /// inline char * next_element(char * buf, bool variable = false)
-fn next_element(line: &str, start: usize) -> Option<usize> {
+fn next_element(line: &str, start: usize, variable: bool) -> Option<usize> {
     let mut position: usize = 0;
+    let mut spaces: u8 = 0;
 
     // iterate over the string
     for p in line.char_indices().skip(start) {
@@ -205,10 +206,15 @@ fn next_element(line: &str, start: usize) -> Option<usize> {
             continue;
         }
 
-        // if !variable {
-        position = p.0 + 1;
-        return skip_ws(line, &position);
-        // }
+        // current character is space or tab.
+        spaces += 1;
+
+        if !variable || character == '\t' || spaces == 2 {
+            position = p.0 + 1;
+            return skip_ws(line, &position);
+        // } else if character == '\t' {
+        //     return skip_ws(line, &position + 1)
+        }
     }
 
     None
@@ -246,6 +252,38 @@ fn skip_ws(line: &str, start: &usize) -> Option<usize> {
     return None;
 }
 
+fn parse_xact_content(source_line: &str) -> LineParseResult {
+    let line = source_line.trim();
+
+    // trailing note
+    if line.starts_with(';') {
+        todo!("trailing note")
+    }
+    // todo: assert, check, expr
+
+    let post = parse_post(source_line);
+
+    todo!("add to xact")
+}
+
+/// Parse a Posting.
+/// line is the source line trimmed on both ends.
+fn parse_post(line: &str) -> Post {
+    // todo: link to transaction
+    // todo: position
+    // pathname
+    // position, line, sequence
+
+    // todo: * and ! marks
+    // state
+    // virtual posts []
+    // deferred posts <>
+
+    let next = next_element(line, 0, true);
+
+    todo!("complete")
+}
+
 #[cfg(test)]
 mod tests {
     use std::io::Cursor;
@@ -273,9 +311,19 @@ mod tests {
     fn test_finding_next_element() {
         let line = "2023-01-12 Supermarket";
 
-        let actual = next_element(line, usize::MIN);
+        let actual = next_element(line, usize::MIN, false);
 
         // The next item (Supermarket) starts at index 11.
         assert_eq!(Some(11), actual);
     }
+
+    #[test]
+    fn test_next_el_spaces() {
+        let line = "Expenses:Food  20 EUR";
+
+        let actual = next_element(line, 0, true);
+
+        assert_eq!(Some(15), actual);
+    }
+
 }

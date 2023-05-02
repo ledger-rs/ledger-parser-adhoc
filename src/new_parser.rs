@@ -11,7 +11,7 @@ use std::io::{BufRead, BufReader, Read};
 
 use chrono::NaiveDate;
 
-use crate::{post::Post, xact::Xact, amount::Amount};
+use crate::{amount::Amount, post::Post, xact::Xact};
 
 enum LineParseResult {
     Comment,
@@ -296,7 +296,6 @@ fn parse_post(line: &str) -> Box<Post> {
 
     let next_char = line.chars().skip(end).next();
     if next.is_some() && next_char.is_some() && next_char != Some(';') && next_char != Some('=') {
-
         if next_char != Some('(') {
             let amount_slice = &line[next.unwrap()..];
             post.amount = Amount::parse(amount_slice);
@@ -314,9 +313,8 @@ fn parse_amount_expr() -> Amount {
 
 #[cfg(test)]
 mod tests {
-    use std::io::Cursor;
-
     use crate::new_parser::{next_element, parse};
+    use std::io::Cursor;
 
     #[test]
     fn basic_tx_test() {

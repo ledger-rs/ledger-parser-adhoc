@@ -7,3 +7,9 @@ impl Commodity {
         Self {  }
     }
 }
+
+/// Parse symbol from the input string.
+pub fn parse_symbol(input: &str) -> &str {
+    // TODO: skip
+    todo!("parse symbol")
+}

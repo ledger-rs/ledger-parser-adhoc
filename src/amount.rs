@@ -1,4 +1,4 @@
-use crate::commodity::Commodity;
+use crate::{commodity::{Commodity, self}, utils};
 
 /**
  * amount.h + amount.cc
@@ -33,43 +33,36 @@ impl Amount {
         // details
         let mut negative = false;
 
-        let mut c = peek_next_nonws(input, 0);
-        let next_char = input.chars().skip(c).next();
+        // cursor for chars.
+        let mut c = utils::peek_next_nonws(input);
+        let mut next_char = input.chars().skip(c).next();
 
         if next_char == Some('-') {
+            // TODO: complete the negative number parsing.
             negative = true;
-            c = peek_next_nonws(input, c);
+            c = utils::peek_next_nonws(input);
+            next_char = input.chars().skip(c).next();
         }
 
         if next_char.unwrap().is_digit(10) {
-            let num_slice = &input[0..];
-            quant = parse_quantity(num_slice);
+            let offset: usize;
+            (quant, offset) = parse_quantity(input);
 
             // COMMODITY_STYLE_SEPARATED
 
-            //let symbol_slice = &line[]
-            symbol = parse_symbol(input);
+            symbol = commodity::parse_symbol(input);
         }
 
         todo!("parse amount")
     }
 }
 
-/// Find the next non-whitespace character location.
-fn peek_next_nonws(line: &str, start: usize) -> usize {
-    for (i, c) in line.char_indices().skip(start) {
-        if c == ' ' {
-            continue;
-        } else {
-            // got to the first space
-            return i;
-        }
-    }
-    return 0;
-}
-
-/// Returns the str of the quantity value.
-fn parse_quantity(input: &str) -> &str {
+/// Identifies the quantity in the input string.
+/// Returns the str of the quantity value and
+/// the last position index (for cursor control).
+/// Parameters:
+/// input
+fn parse_quantity(input: &str) -> (&str, usize) {
     let mut start: usize = 0;
     let mut end: usize = 0;
 
@@ -82,24 +75,21 @@ fn parse_quantity(input: &str) -> &str {
         if c.is_digit(10) || c == '.' || c == ',' {
             continue;
         } else {
-            return &input[start..i];
+            return (&input[start..i], i);
         }
     }
-    return "";
+    return ("", 0);
 }
 
-fn parse_symbol(input: &str) -> &str {
-    todo!("parse symbol")
-}
 
 #[cfg(test)]
 mod tests {
-    use crate::amount::{parse_quantity, parse_symbol};
+    use crate::{amount::parse_quantity, utils::peek_next_nonws, commodity::parse_symbol};
 
-    use super::{peek_next_nonws, Amount};
+    use super::Amount;
 
     #[test]
-    fn test_amount_parsing_20_eur() {
+    fn test_parse_20_eur() {
         let amount_str = "20 EUR";
         let expected = Amount::new();
 
@@ -122,7 +112,7 @@ mod tests {
     fn test_peek_next_nonws() {
         let line = "10 ABC";
 
-        let actual = peek_next_nonws(line, 0);
+        let actual = peek_next_nonws(line);
 
         assert_eq!(0, actual);
     }
@@ -131,23 +121,25 @@ mod tests {
     fn test_peek_next_nonws_without_space() {
         let line = "10ABC";
 
-        let actual = peek_next_nonws(line, 0);
+        let actual = peek_next_nonws(line);
 
         assert_eq!(0, actual);
     }
 
     #[test]
     fn test_parse_quantity_positive() {
-        let actual = parse_quantity("20 EUR");
+        let (actual, offset) = parse_quantity("20 EUR");
 
-        assert_eq!("20", actual)
+        assert_eq!("20", actual);
+        assert_eq!(2, offset);
     }
 
     #[test]
     fn test_parse_quantity_negative() {
-        let actual = parse_quantity("-20 EUR");
+        let (actual, offset) = parse_quantity("-20 EUR");
 
         assert_eq!("20", actual);
+        assert_eq!(3, offset);
     }
 
     #[test]

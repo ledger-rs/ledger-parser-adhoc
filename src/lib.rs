@@ -15,6 +15,7 @@ mod new_parser;
 mod post;
 mod session;
 mod textual;
+mod utils;
 mod xact;
 
 pub fn parse() {

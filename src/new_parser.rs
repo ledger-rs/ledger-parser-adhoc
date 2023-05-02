@@ -231,12 +231,12 @@ fn parse_date(line: &str) -> NaiveDate {
     date
 }
 
-fn strip_trailing_newline(input: &str) -> &str {
-    input
-        .strip_suffix("\r\n")
-        .or(input.strip_suffix("\n"))
-        .unwrap_or(input)
-}
+// fn strip_trailing_newline(input: &str) -> &str {
+//     input
+//         .strip_suffix("\r\n")
+//         .or(input.strip_suffix("\n"))
+//         .unwrap_or(input)
+// }
 
 /// Starts iterating through the string at the given location,
 /// skips the whitespace and returns the location of the next element.

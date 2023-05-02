@@ -12,6 +12,7 @@ mod context;
 mod global;
 mod journal;
 mod new_parser;
+mod pool;
 mod post;
 mod session;
 mod textual;

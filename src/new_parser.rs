@@ -11,7 +11,7 @@ use std::io::{BufRead, BufReader, Read};
 
 use chrono::NaiveDate;
 
-use crate::{xact::Xact, post::Post};
+use crate::{post::Post, xact::Xact, amount::Amount};
 
 enum LineParseResult {
     Comment,
@@ -117,7 +117,7 @@ fn process_parsed_element(context: &mut ParsingContext, parse_result: LineParseR
                 todo!("finalize the transaction")
             }
             // else just ignore.
-        },
+        }
         LineParseResult::Xact(xact) => {
             context.xact = Some(xact);
             // The transaction is finalized and added to Journal
@@ -212,8 +212,8 @@ fn next_element(line: &str, start: usize, variable: bool) -> Option<usize> {
         if !variable || character == '\t' || spaces == 2 {
             position = p.0 + 1;
             return skip_ws(line, &position);
-        // } else if character == '\t' {
-        //     return skip_ws(line, &position + 1)
+            // } else if character == '\t' {
+            //     return skip_ws(line, &position + 1)
         }
     }
 
@@ -261,14 +261,16 @@ fn parse_xact_content(source_line: &str) -> LineParseResult {
     }
     // todo: assert, check, expr
 
-    let post = parse_post(source_line);
+    let post = parse_post(line);
 
     todo!("add to xact")
 }
 
 /// Parse a Posting.
 /// line is the source line trimmed on both ends.
-fn parse_post(line: &str) -> Post {
+fn parse_post(line: &str) -> Box<Post> {
+    let mut post = Box::new(Post::new());
+
     // todo: link to transaction
     // todo: position
     // pathname
@@ -281,6 +283,31 @@ fn parse_post(line: &str) -> Post {
 
     let next = next_element(line, 0, true);
 
+    let end = match next {
+        Some(index) => index,
+        None => line.len(),
+    };
+
+    let name = line[0..end].trim_end().to_string();
+    // TODO: register account with the Journal, structure into a tree.
+    post.account = name;
+
+    // Parse the optional amount
+
+    let next_char = line.chars().skip(end).next();
+    if next.is_some() && next_char.is_some() && next_char != Some(';') && next_char != Some('=') {
+
+        if next_char != Some('(') {
+            post.amount = Amount::parse(line, next.unwrap());
+        } else {
+            post.amount = parse_amount_expr();
+        }
+    }
+
+    todo!("complete")
+}
+
+fn parse_amount_expr() -> Amount {
     todo!("complete")
 }
 
@@ -325,5 +352,4 @@ mod tests {
 
         assert_eq!(Some(15), actual);
     }
-
 }

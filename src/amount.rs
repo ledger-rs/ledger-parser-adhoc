@@ -27,28 +27,28 @@ impl Amount {
     /// The possible syntax for an amount is:
     ///   [-]NUM[ ]SYM [@ AMOUNT]
     ///   SYM[ ][-]NUM [@ AMOUNT]
-    pub fn parse(line: &str, pos: usize) -> Amount {
+    pub fn parse(input: &str) -> Amount {
         let symbol: &str;
         let quant: &str;
         // details
         let mut negative = false;
 
-        let mut c = peek_next_nonws(line, pos);
-        let next_char = line.chars().skip(c).next();
+        let mut c = peek_next_nonws(input, 0);
+        let next_char = input.chars().skip(c).next();
 
         if next_char == Some('-') {
             negative = true;
-            c = peek_next_nonws(line, c);
+            c = peek_next_nonws(input, c);
         }
 
         if next_char.unwrap().is_digit(10) {
-            let num_slice = &line[pos..];
+            let num_slice = &input[0..];
             quant = parse_quantity(num_slice);
 
             // COMMODITY_STYLE_SEPARATED
 
             //let symbol_slice = &line[]
-            symbol = parse_symbol(line);
+            symbol = parse_symbol(input);
         }
 
         todo!("parse amount")
@@ -103,7 +103,7 @@ mod tests {
         let amount_str = "20 EUR";
         let expected = Amount::new();
 
-        let actual = Amount::parse(amount_str, 0);
+        let actual = Amount::parse(amount_str);
 
         assert_eq!(expected, actual);
     }
@@ -113,7 +113,7 @@ mod tests {
         let amount_str = "-20 EUR";
         let expected = Amount::new();
 
-        let actual = Amount::parse(amount_str, 0);
+        let actual = Amount::parse(amount_str);
 
         assert_eq!(expected, actual);
     }

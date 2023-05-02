@@ -298,7 +298,8 @@ fn parse_post(line: &str) -> Box<Post> {
     if next.is_some() && next_char.is_some() && next_char != Some(';') && next_char != Some('=') {
 
         if next_char != Some('(') {
-            post.amount = Amount::parse(line, next.unwrap());
+            let amount_slice = &line[next.unwrap()..];
+            post.amount = Amount::parse(amount_slice);
         } else {
             post.amount = parse_amount_expr();
         }

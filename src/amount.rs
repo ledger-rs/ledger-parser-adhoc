@@ -47,10 +47,12 @@ impl Amount {
         if next_char.unwrap().is_digit(10) {
             let offset: usize;
             (quant, offset) = parse_quantity(input);
+            // move the cursor
+            c += offset;
 
             // COMMODITY_STYLE_SEPARATED
 
-            symbol = commodity::parse_symbol(input);
+            symbol = commodity::parse_symbol(&input[c..]);
         }
 
         todo!("parse amount")

@@ -11,7 +11,7 @@ use std::io::{BufRead, BufReader, Read};
 
 use chrono::NaiveDate;
 
-use crate::{amount::Amount, post::Post, xact::Xact};
+use crate::{amount::Amount, post::Post, xact::Xact, pool::CommodityPool};
 
 enum LineParseResult {
     Comment,
@@ -20,14 +20,16 @@ enum LineParseResult {
     Post,
 }
 
-struct ParsingContext {
+pub(crate) struct ParsingContext {
+    pub commodity_pool: CommodityPool,
+
     /// Transaction being parsed currently. If exist, we are in the process of parsing posts.
     xact: Option<Xact>,
 }
 
 impl ParsingContext {
     pub fn new() -> Self {
-        Self { xact: None }
+        Self { xact: None, commodity_pool: CommodityPool::new() }
     }
 }
 
@@ -70,7 +72,7 @@ pub fn parse<T: Read>(source: T) {
 }
 
 /// Parsing each individual line. The controller of the parsing logic.
-fn parse_line(context: &mut ParsingContext, line: &str) -> LineParseResult {
+fn parse_line<'a>(context: &mut ParsingContext, line: &str) -> LineParseResult {
     let len = line.len();
     if len == 0 {
         return LineParseResult::Empty;
@@ -90,7 +92,7 @@ fn parse_line(context: &mut ParsingContext, line: &str) -> LineParseResult {
 
         ' ' | '\t' => {
             if context.xact.is_some() {
-                return parse_xact_content(line);
+                return parse_xact_content(context, line);
             } else {
                 panic!("Unexpected whitespace at beginning of line");
             }
@@ -252,7 +254,7 @@ fn skip_ws(line: &str, start: &usize) -> Option<usize> {
     return None;
 }
 
-fn parse_xact_content(source_line: &str) -> LineParseResult {
+fn parse_xact_content(context: &mut ParsingContext, source_line: &str) -> LineParseResult {
     let line = source_line.trim();
 
     // trailing note
@@ -261,14 +263,14 @@ fn parse_xact_content(source_line: &str) -> LineParseResult {
     }
     // todo: assert, check, expr
 
-    let post = parse_post(line);
+    let post = parse_post(context, line);
 
     todo!("add to xact")
 }
 
 /// Parse a Posting.
 /// line is the source line trimmed on both ends.
-fn parse_post(line: &str) -> Box<Post> {
+fn parse_post(context: &mut ParsingContext, line: &str) -> Box<Post> {
     let mut post = Box::new(Post::new());
 
     // todo: link to transaction
@@ -298,7 +300,7 @@ fn parse_post(line: &str) -> Box<Post> {
     if next.is_some() && next_char.is_some() && next_char != Some(';') && next_char != Some('=') {
         if next_char != Some('(') {
             let amount_slice = &line[next.unwrap()..];
-            post.amount = Amount::parse(amount_slice);
+            post.amount = Amount::parse(context, amount_slice);
         } else {
             post.amount = parse_amount_expr();
         }

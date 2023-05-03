@@ -1,4 +1,9 @@
-use crate::{commodity::{Commodity, self}, utils};
+use std::cell::Cell;
+
+use crate::{
+    commodity::{self, Commodity},
+    utils, new_parser::ParsingContext,
+};
 
 /**
  * amount.h + amount.cc
@@ -6,18 +11,18 @@ use crate::{commodity::{Commodity, self}, utils};
 
 #[derive(Debug, PartialEq)]
 pub struct Amount {
-    precision: u16,
-
+    // precision: u16,
     quantity: i64,
-    commodity: Commodity,
+    // commodity: Option<&Commodity>,
+    commodity: Cell<Commodity>
 }
 
 impl Amount {
     pub fn new() -> Self {
         Self {
-            precision: 0,
+            // precision: 0,
             quantity: 0,
-            commodity: Commodity::new(),
+            commodity: Cell::new(Commodity::new()),
         }
     }
 
@@ -27,7 +32,7 @@ impl Amount {
     /// The possible syntax for an amount is:
     ///   [-]NUM[ ]SYM [@ AMOUNT]
     ///   SYM[ ][-]NUM [@ AMOUNT]
-    pub fn parse(input: &str) -> Amount {
+    pub(crate) fn parse(context: &mut ParsingContext, input: &str) -> Amount {
         let symbol: &str;
         let quant: &str;
         // details
@@ -53,9 +58,29 @@ impl Amount {
             // COMMODITY_STYLE_SEPARATED
 
             symbol = commodity::parse_symbol(&input[c..]);
+        } else {
+            todo!("commodity-first format, i.e. $25")
         }
 
-        todo!("parse amount")
+        if quant.is_empty() {
+            panic!("No quantity specified for amount")
+        }
+
+        // Create the commodity if has not already been seen, and update the
+        // precision if something greater was used for the quantity.
+
+        let mut amount = Amount::new();
+
+        if symbol.is_empty() {
+            // amount.commodity = None;
+        } else {
+            // amount.commodity.set(context.commodity_pool.find(symbol));
+            // TODO: amount.commodity = ;
+
+            todo!("commodity treatment")
+        }
+
+        amount
     }
 }
 
@@ -70,7 +95,7 @@ fn parse_quantity(input: &str) -> (&str, usize) {
 
     if input.chars().next() == Some('-') {
         start += 1;
-    } 
+    }
 
     // read characters so long as they are numeric.
     for (i, c) in input.char_indices().skip(start) {
@@ -83,10 +108,9 @@ fn parse_quantity(input: &str) -> (&str, usize) {
     return ("", 0);
 }
 
-
 #[cfg(test)]
 mod tests {
-    use crate::{amount::parse_quantity, utils::peek_next_nonws, commodity::parse_symbol};
+    use crate::{amount::parse_quantity, commodity::parse_symbol, utils::peek_next_nonws, new_parser::ParsingContext};
 
     use super::Amount;
 
@@ -94,8 +118,9 @@ mod tests {
     fn test_parse_20_eur() {
         let amount_str = "20 EUR";
         let expected = Amount::new();
+        let mut context = ParsingContext::new();
 
-        let actual = Amount::parse(amount_str);
+        let actual = Amount::parse(&mut context, amount_str);
 
         assert_eq!(expected, actual);
     }
@@ -104,8 +129,9 @@ mod tests {
     fn test_amount_parsing_negative() {
         let amount_str = "-20 EUR";
         let expected = Amount::new();
+        let mut context = ParsingContext::new();
 
-        let actual = Amount::parse(amount_str);
+        let actual = Amount::parse(&mut context, amount_str);
 
         assert_eq!(expected, actual);
     }

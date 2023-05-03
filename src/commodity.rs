@@ -1,7 +1,7 @@
 use crate::utils::peek_next_nonws;
 
 
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub(crate) struct Commodity {}
 
 impl Commodity {

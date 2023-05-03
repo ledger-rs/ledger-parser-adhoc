@@ -2,7 +2,8 @@ use std::cell::Cell;
 
 use crate::{
     commodity::{self, Commodity},
-    utils, new_parser::ParsingContext,
+    new_parser::ParsingContext,
+    utils,
 };
 
 /**
@@ -11,19 +12,23 @@ use crate::{
 
 #[derive(Debug, PartialEq)]
 pub struct Amount {
-    // precision: u16,
+    precision: u16,
     quantity: i64,
     // commodity: Option<&Commodity>,
-    commodity: Cell<Commodity>
+    commodity: Option<Commodity>,
 }
 
 impl Amount {
     pub fn new() -> Self {
         Self {
-            // precision: 0,
+            precision: 0,
             quantity: 0,
-            commodity: Cell::new(Commodity::new()),
+            commodity: None,
         }
+    }
+
+    pub(crate) fn from(quantity: i64, precision: u16, commodity: Option<Commodity>) -> Self {
+        Self { precision, quantity, commodity }
     }
 
     /// Parse amount
@@ -74,11 +79,35 @@ impl Amount {
         if symbol.is_empty() {
             // amount.commodity = None;
         } else {
-            // amount.commodity.set(context.commodity_pool.find(symbol));
-            // TODO: amount.commodity = ;
-
-            todo!("commodity treatment")
+            // TODO: use a reference
+            // let commodity = context.commodity_pool.find(symbol);
+            // TODO: create if not found.
+            // amount.commodity = Cell::new(commodity);
+            // For now, just use the symbol.
+            amount.commodity = Some(Commodity::new(symbol.to_string()));
         }
+
+        // precision
+        let mut decimal_offset: u16 = 0;
+        // iterate through characters backwards, searching for the decimal separator.
+        for c in quant.chars().rev() {
+            if c == '.' {
+                // TODO: check for multiple decimal separators
+                // todo: decimal comma style
+                todo!("process")
+            } else if c == ',' {
+                todo!("process")
+            } else {
+                decimal_offset += 1;
+            }
+        }
+        // todo: assign precision to commodity
+        // if amount.precision > commodity.precision
+
+        amount.quantity = i64::from_str_radix(quant, 10).expect("parsed quantity");
+        // TODO: amount.precision
+
+        // TODO: negative number
 
         amount
     }
@@ -110,14 +139,18 @@ fn parse_quantity(input: &str) -> (&str, usize) {
 
 #[cfg(test)]
 mod tests {
-    use crate::{amount::parse_quantity, commodity::parse_symbol, utils::peek_next_nonws, new_parser::ParsingContext};
+    use crate::{
+        amount::parse_quantity, commodity::{parse_symbol, Commodity}, new_parser::ParsingContext,
+        utils::peek_next_nonws,
+    };
 
     use super::Amount;
 
     #[test]
     fn test_parse_20_eur() {
         let amount_str = "20 EUR";
-        let expected = Amount::new();
+        let exp_commodity = Commodity::new("EUR".into());
+        let expected = Amount::from(20, 0, Some(exp_commodity));
         let mut context = ParsingContext::new();
 
         let actual = Amount::parse(&mut context, amount_str);

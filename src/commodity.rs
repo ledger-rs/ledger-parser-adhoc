@@ -1,12 +1,21 @@
 use crate::utils::peek_next_nonws;
 
 
-#[derive(Clone, Copy, Debug, PartialEq)]
-pub(crate) struct Commodity {}
+#[derive(Debug, PartialEq)]
+pub(crate) struct Commodity {
+    symbol: String,
+    // graph_index
+    // precision
+    // name
+    // note
+    // smaller
+    // larger
+    // value_expr
+}
 
 impl Commodity {
-    pub fn new() -> Self {
-        Self {  }
+    pub fn new(symbol: String) -> Self {
+        Self { symbol }
     }
 }
 

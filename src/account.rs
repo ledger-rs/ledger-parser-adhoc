@@ -2,7 +2,7 @@
  * account.h + account.cc
  */
 
-pub(crate) struct Account {}
+pub struct Account {}
 
 impl Account {
     pub fn new() -> Self {

@@ -6,14 +6,15 @@ use crate::post::Post;
  * xact.cc
  */
 
-pub(crate) struct Xact {
+#[derive(Debug)]
+pub struct Xact {
     // Item
     date: Option<NaiveDate>,
     // date_aux
 
     // Xact base
     // journal
-    posts: Vec<Post>,
+    pub posts: Vec<Post>,
 
     // code: Option<String>,
     payee: String,
@@ -22,7 +23,7 @@ pub(crate) struct Xact {
     // date: Option<Date>
     // date_aux:
     note: Option<String>, // pos: Option<Position>
-                           // metadata: Option<string_map>
+                          // metadata: Option<string_map>
 }
 
 impl Xact {
@@ -37,15 +38,25 @@ impl Xact {
         }
     }
 
-    pub fn add_post() {
-        todo!("implement")
+    pub fn add_post(&mut self, post: Post) {
+        self.posts.push(post);
     }
 
-    pub fn remove_post() {
+    pub fn finalize(&self) {
+        // TODO: calculate balance
+
+        // TODO: calculate conversion ratio
+
+        // Add a pointer to each posting to their related accounts
+
         todo!("complete")
     }
 
-    pub fn lookup() {
+    pub fn remove_post(&self) {
+        todo!("complete")
+    }
+
+    pub fn lookup(&self) {
         todo!("complete")
     }
 }

@@ -1,13 +1,18 @@
-use crate::{account::Account, context::{ParseContextStack, ParseContext}, textual::Instance};
+use crate::{
+    account::Account,
+    context::{ParseContext, ParseContextStack},
+    textual::Instance,
+    xact::Xact,
+};
 
 /**
  * journal.cc + journal.h
  */
 
-pub(crate) struct Journal {
+pub struct Journal {
     pub master: Account,
     // bucket
-    // xacts
+    pub xacts: Vec<Xact>,
     // sources
     // known_payees
     // known_tags
@@ -19,8 +24,20 @@ impl Journal {
     pub fn new() -> Self {
         Journal {
             master: Account::new(),
+            xacts: vec![],
             // current_context: ,
-          }
+        }
+    }
+
+    pub fn add_xact(&mut self, xact: Xact) {
+        // todo: xact.journal =
+        // TODO: xact.finalize()
+
+        // todo: extend_xact()
+        // todo: check_all_metadata())
+        // todo: for each post - extend + check metadata
+
+        self.xacts.push(xact);
     }
 
     pub fn find_account(&self, name: &str, auto_create: bool) -> &Account {
@@ -36,9 +53,7 @@ impl Journal {
 
         count
     }
-    
 }
-
 
 fn read_textual(context_stack: &ParseContextStack, context: &ParseContext) -> usize {
     let mut instance: Instance = Instance::new(context_stack, context);
@@ -50,7 +65,7 @@ fn read_textual(context_stack: &ParseContextStack, context: &ParseContext) -> us
 mod tests {
     use std::path::PathBuf;
 
-    use crate::{context::ParseContextStack, account::Account};
+    use crate::{account::Account, context::ParseContextStack};
 
     use super::Journal;
 

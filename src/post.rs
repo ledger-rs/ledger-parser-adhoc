@@ -4,6 +4,7 @@ use crate::{xact::Xact, account::Account, amount::Amount};
  * posts.h + posts.cc
  */
 
+#[derive(Debug, PartialEq)]
 pub struct Post {
     // xact: &Xact,
     // account: &Account,

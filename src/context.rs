@@ -13,7 +13,7 @@ use crate::{account::Account, journal::Journal};
 
 const MAX_LINE: usize = 4096;
 
-pub(crate) struct ParseContext<'path> {
+pub struct ParseContext<'path> {
     // stream
     pub pathname: &'path PathBuf,
     pub current_directory: PathBuf,
@@ -57,7 +57,7 @@ impl<'path> ParseContext<'path> {
     }
 }
 
-pub(crate) struct ParseContextStack<'path> {
+pub struct ParseContextStack<'path> {
     parsing_context: Vec<ParseContext<'path>>,
 }
 

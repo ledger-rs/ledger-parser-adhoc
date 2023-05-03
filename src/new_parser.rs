@@ -7,21 +7,25 @@
 // todo: get the list of files to parse
 
 // todo: generate a stream (or Read?), which can be text or File.
-use std::io::{BufRead, BufReader, Read};
+use std::{
+    cell::Cell,
+    io::{BufRead, BufReader, Read},
+};
 
 use chrono::NaiveDate;
 
-use crate::{amount::Amount, post::Post, xact::Xact, pool::CommodityPool};
+use crate::{amount::Amount, journal::Journal, pool::CommodityPool, post::Post, xact::Xact};
 
 enum LineParseResult {
     Comment,
     Empty,
     Xact(Xact),
-    Post,
+    Post(Post),
 }
 
 pub(crate) struct ParsingContext {
     pub commodity_pool: CommodityPool,
+    pub journal: Journal,
 
     /// Transaction being parsed currently. If exist, we are in the process of parsing posts.
     xact: Option<Xact>,
@@ -29,13 +33,17 @@ pub(crate) struct ParsingContext {
 
 impl ParsingContext {
     pub fn new() -> Self {
-        Self { xact: None, commodity_pool: CommodityPool::new() }
+        Self {
+            xact: None,
+            commodity_pool: CommodityPool::new(),
+            journal: Journal::new(),
+        }
     }
 }
 
 /// Entry point.
 /// A File or a Cursor (for text) can be passed in to be parsed.
-pub fn parse<T: Read>(source: T) {
+pub fn parse<T: Read>(source: T) -> Journal {
     // reader
     let mut reader = BufReader::new(source);
     let mut context = ParsingContext::new();
@@ -68,7 +76,8 @@ pub fn parse<T: Read>(source: T) {
         }
     }
 
-    todo!("Return the result")
+    // todo!("Return the result")
+    context.journal
 }
 
 /// Parsing each individual line. The controller of the parsing logic.
@@ -110,22 +119,34 @@ fn parse_line<'a>(context: &mut ParsingContext, line: &str) -> LineParseResult {
 fn process_parsed_element(context: &mut ParsingContext, parse_result: LineParseResult) {
     match parse_result {
         LineParseResult::Comment => (),
+
         LineParseResult::Empty => {
-            if context.xact.is_some() {
-                // An empty line is a separator between transactions.
-                // TODO: Append to Journal.
-                // Reset the current transaction.
-                context.xact = None;
-                todo!("finalize the transaction")
+            match context.xact.take() {
+                Some(xact_val) => {
+                    // An empty line is a separator between transactions.
+                    // Append to Journal.
+                    context.journal.add_xact(xact_val);
+
+                    // Reset the current transaction variable. <= done by .take()
+                    // context.xact = None;
+
+                }
+                // else just ignore.
+                None => (),
             }
-            // else just ignore.
         }
+
         LineParseResult::Xact(xact) => {
             context.xact = Some(xact);
             // The transaction is finalized and added to Journal
             // after the posts are processed.
         }
-        LineParseResult::Post => todo!(),
+
+        LineParseResult::Post(post) => {
+            // todo: link xact to post.xact
+            // add to xact.posts
+            context.xact.as_mut().expect("xact ref").add_post(post);
+        }
     }
 }
 
@@ -178,7 +199,7 @@ fn parse_xact(line: &str) -> LineParseResult {
     }
 
     // Parse the xact note
-    let note = "".to_string();
+    let note: Option<String> = None;
     if next.is_some()
         && next_index < line.len()
         && line.chars().skip(next_index).next() == Some(';')
@@ -186,11 +207,12 @@ fn parse_xact(line: &str) -> LineParseResult {
         todo!("append note")
     }
 
-    // TODO: Parse all of the posts associated with this xact
+    // Parse all of the posts associated with this xact
+    // ^ Parsed separately.
 
     // Tags
 
-    let xact = Xact::new(Some(date), payee, Some(note));
+    let xact = Xact::new(Some(date), payee, note);
     LineParseResult::Xact(xact)
 }
 
@@ -264,14 +286,13 @@ fn parse_xact_content(context: &mut ParsingContext, source_line: &str) -> LinePa
     // todo: assert, check, expr
 
     let post = parse_post(context, line);
-
-    todo!("add to xact")
+    LineParseResult::Post(post)
 }
 
 /// Parse a Posting.
 /// line is the source line trimmed on both ends.
-fn parse_post(context: &mut ParsingContext, line: &str) -> Box<Post> {
-    let mut post = Box::new(Post::new());
+fn parse_post(context: &mut ParsingContext, line: &str) -> Post {
+    let mut post = Post::new();
 
     // todo: link to transaction
     // todo: position
@@ -306,7 +327,15 @@ fn parse_post(context: &mut ParsingContext, line: &str) -> Box<Post> {
         }
     }
 
-    todo!("complete")
+    // Parse the optional balance assignment
+
+    // Parse the optional note
+
+    // There should be nothing more to read
+
+    // tags
+
+    post
 }
 
 fn parse_amount_expr() -> Amount {
@@ -318,6 +347,7 @@ mod tests {
     use crate::new_parser::{next_element, parse};
     use std::io::Cursor;
 
+    /// test used mostly for debugging but a base for parsing a single transaction
     #[test]
     fn basic_tx_test() {
         // a simple transaction with space on top.
@@ -330,8 +360,13 @@ mod tests {
 
         // Cursor already implements BufReader!
         let cursor = Cursor::new(tx_str);
-        parse(cursor);
+        let actual = parse(cursor);
 
+        assert_eq!(1, actual.xacts.len());
+
+        for xact in actual.xacts {
+            println!("xact: {:?}", xact);
+        }
         assert!(false);
     }
 
@@ -352,5 +387,21 @@ mod tests {
         let actual = next_element(line, 0, true);
 
         assert_eq!(Some(15), actual);
+    }
+
+    #[test]
+    fn test_conversion() {
+        let tx_str = r#"
+2023-04-10 Conversion
+    Assets:CashEur  -20 EUR
+    Assets:CashUsd  25 USD
+
+"#;
+
+        // Cursor already implements BufReader!
+        let cursor = Cursor::new(tx_str);
+        parse(cursor);
+
+        assert!(false);
     }
 }

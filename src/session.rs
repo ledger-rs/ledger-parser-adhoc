@@ -1,10 +1,15 @@
+/**
+ * session.cc + session.h
+ * 
+ * Session objects
+ * Every journal object is owned by a session, with the session providing support for that object.
+ * In GUI terms, this is the Controller object for the journal Data object, where every document 
+ * window would be a separate session. They are all owned by the global scope. 
+ */
+
 use std::path::PathBuf;
 
 use crate::{account::Account, context::ParseContextStack, journal::Journal};
-
-/**
- * session.cc + session.h
- */
 
 pub(crate) struct Session<'a> {
     pub data_files: Vec<PathBuf>,
@@ -13,7 +18,7 @@ pub(crate) struct Session<'a> {
     pub parsing_context: ParseContextStack<'a>,
 }
 
-impl <'a> Session<'a> {
+impl<'a> Session<'a> {
     pub fn new() -> Self {
         Self {
             journal: Box::new(Journal::new()),
@@ -37,7 +42,6 @@ impl <'a> Session<'a> {
         let populated_data_files = false;
         if self.data_files.is_empty() {
             // todo: get file paths
-
         }
 
         let mut xact_count: usize = 0;
@@ -82,6 +86,15 @@ impl <'a> Session<'a> {
     fn read_journal(&self) {}
 }
 
+/// TODO: Create an entry point that is called from code, not CLI.
+/// Run a report
+pub fn run(args: Vec<String>) {
+    // todo: read journal files (data)
+
+    // todo: run report
+
+}
+
 #[cfg(test)]
 mod tests {
     use crate::session::Session;
@@ -98,5 +111,15 @@ mod tests {
 
         assert!(false);
         // assert_eq!(1, actual);
+    }
+
+    /// development test, used for debugging through.
+    #[test]
+    fn test_bal_report() {
+        let args: Vec<String> = vec!["b".into()];
+
+        // let actual = run(args);
+
+        assert!(false)
     }
 }

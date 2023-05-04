@@ -32,14 +32,15 @@ pub(crate) fn run() {
 
     let global_scope = GlobalScope::new();
 
-    // todo: get command-line arguments
+    // TODO: get command-line arguments
     // args = argv[i]
+    let args = vec![];
 
     // todo: if (!args.empty())
-    execute_command_wrapper();
+    execute_command_wrapper(args);
 }
 
-fn execute_command_wrapper() {
+fn execute_command_wrapper(args: Vec<String>) {
     execute_command();
 }
 
@@ -48,3 +49,4 @@ fn execute_command() {
     // not pre-command
     // not repl
 }
+

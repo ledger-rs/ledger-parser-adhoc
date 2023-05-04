@@ -76,7 +76,8 @@ pub fn parse<T: Read>(source: T) -> Journal {
         }
     }
 
-    // todo!("Return the result")
+    // todo: verify that the journal is valid
+    
     context.journal
 }
 

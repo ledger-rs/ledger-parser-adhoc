@@ -1,6 +1,6 @@
 use crate::{
     account::Account,
-    context::{ParseContext, ParseContextStack},
+    context::{ParseContext},
     textual::Instance,
     xact::Xact,
 };
@@ -46,16 +46,17 @@ impl Journal {
 
     /// journal.cc,
     /// std::size_t journal_t::read(parse_context_stack_t &context)
-    pub fn read(&self, context_stack: &ParseContextStack) -> usize {
+    pub fn read(&self, context_stack: &Vec<ParseContext>) -> usize {
         let mut count: usize = 0;
 
-        count = read_textual(context_stack, context_stack.get_current());
+        let context = context_stack.last().expect("the last context");
+        count = read_textual(context_stack, context);
 
         count
     }
 }
 
-fn read_textual(context_stack: &ParseContextStack, context: &ParseContext) -> usize {
+fn read_textual(context_stack: &Vec<ParseContext>, context: &ParseContext) -> usize {
     let mut instance: Instance = Instance::new(context_stack, context);
     // instance.apply_stack...
     instance.parse()
@@ -63,9 +64,9 @@ fn read_textual(context_stack: &ParseContextStack, context: &ParseContext) -> us
 
 #[cfg(test)]
 mod tests {
-    use std::path::PathBuf;
+    use std::{path::PathBuf, vec};
 
-    use crate::{account::Account, context::ParseContextStack};
+    use crate::{account::Account, context::ParseContext};
 
     use super::Journal;
 
@@ -73,10 +74,12 @@ mod tests {
     fn test_journal_read() {
         let journal = Journal::new();
         let master = &Account::new();
-        let mut context = ParseContextStack::new();
+        // let mut context = ParseContextStack::new();
+        let mut context = vec![];
         let pathname = PathBuf::from("tests/first.ledger");
         //context.push(&path);
-        context.add_new(&pathname, &journal, master);
+        let parse_context = ParseContext::new(&pathname, &journal, master);
+        context.push(parse_context);
 
         let actual = journal.read(&context);
 

@@ -1,21 +1,23 @@
 /**
  * session.cc + session.h
- * 
+ *
  * Session objects
  * Every journal object is owned by a session, with the session providing support for that object.
- * In GUI terms, this is the Controller object for the journal Data object, where every document 
- * window would be a separate session. They are all owned by the global scope. 
+ * In GUI terms, this is the Controller object for the journal Data object, where every document
+ * window would be a separate session. They are all owned by the global scope.
  */
+use std::{
+    io::stdin,
+    path::{self, PathBuf},
+};
 
-use std::path::{PathBuf, self};
-
-use crate::{account::Account, context::ParseContextStack, journal::Journal};
+use crate::{account::Account, context::ParseContext, journal::Journal};
 
 pub(crate) struct Session<'a> {
     pub data_files: Vec<PathBuf>,
 
     pub journal: Journal,
-    pub parsing_context: ParseContextStack<'a>,
+    pub parsing_context: Vec<ParseContext<'a>>,
 }
 
 impl<'a> Session<'a> {
@@ -23,7 +25,7 @@ impl<'a> Session<'a> {
         Self {
             journal: Journal::new(),
             data_files: vec![],
-            parsing_context: ParseContextStack::new(),
+            parsing_context: vec!(),
         }
     }
 
@@ -64,19 +66,21 @@ impl<'a> Session<'a> {
         // if price_db_path...
 
         for pathname in self.data_files.iter() {
-            // todo: handle "-" and "/dev/stdin"
             if pathname.to_str() == Some("-") || pathname.to_str() == Some("/dev/stdin") {
                 // TODO: read from stdin
+                let buffer = stdin().lines();
+            } else {
+                let parse_context = ParseContext::new(pathname, &self.journal, account);
+                self.parsing_context.push(parse_context);
             }
-            // else
-            // self.parsing_context.push(pathname);
 
             // todo: set journal
             // self.parsing_context.get_current().journal = self.journal.get();
             let journal = &self.journal;
             // todo: set master
             // self.parsing_context.get_current().ma
-            self.parsing_context.add_new(pathname, journal, &account);
+            let parse_context = ParseContext::new(pathname, journal, account);
+            self.parsing_context.push(parse_context);
 
             xact_count += self.journal.read(&self.parsing_context);
 
@@ -95,7 +99,6 @@ pub fn run(args: Vec<String>) {
     // todo: read journal files (data)
 
     // todo: run report
-
 }
 
 #[cfg(test)]
@@ -141,7 +144,7 @@ mod tests {
 
         // session.
 
-        // let actual = 
+        // let actual =
 
         todo!("complete")
     }

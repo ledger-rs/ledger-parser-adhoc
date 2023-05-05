@@ -4,7 +4,6 @@
  */
 
 use global::GlobalScope;
-use session::Session;
 
 mod account;
 mod amount;
@@ -24,14 +23,8 @@ mod textual;
 mod utils;
 mod xact;
 
-pub fn parse() {
-    // global::run();
-    let mut s = Session::new();
-    s.read_journal_files();
-}
-
 /// main function from Ledger
-pub fn main(args: Vec<String>) {
+pub fn main(args: Vec<&str>) {
     log::info!("Ledger starting");
 
     // Create the session object, which maintains nearly all state relating to
@@ -52,11 +45,13 @@ pub fn main(args: Vec<String>) {
 
 #[cfg(test)]
 mod tests {
-    use crate::parse;
+    use crate::main;
+
 
     #[test]
-    fn full_cycle() {
-        parse();
+    fn test_main() {
+        let args = vec!["b"];
+        main(args);
 
         assert!(false);
     }

@@ -14,20 +14,20 @@ use crate::{account::Account, context::ParseContextStack, journal::Journal};
 pub(crate) struct Session<'a> {
     pub data_files: Vec<PathBuf>,
 
-    pub journal: Box<Journal>,
+    pub journal: Journal,
     pub parsing_context: ParseContextStack<'a>,
 }
 
 impl<'a> Session<'a> {
     pub fn new() -> Self {
         Self {
-            journal: Box::new(Journal::new()),
+            journal: Journal::new(),
             data_files: vec![],
             parsing_context: ParseContextStack::new(),
         }
     }
 
-    pub(crate) fn read_journal_files(&'a mut self) -> &'a Journal {
+    pub(crate) fn read_journal_files(&'a mut self) -> &Journal {
         log::info!("Read journal file");
 
         let master_account: String = "".into();

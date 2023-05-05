@@ -20,7 +20,7 @@ pub(crate) struct Instance<'a> {
 }
 
 impl<'a> Instance<'a> {
-    pub fn new(context_stack: &'a ParseContextStack<'a>, context: &'a ParseContext<'a>) -> Self {
+    pub fn new(context_stack: &ParseContextStack, context: &ParseContext) -> Self {
         Self {
             context_stack,
             context,

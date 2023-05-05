@@ -13,12 +13,12 @@ use crate::{account::Account, journal::Journal};
 
 const MAX_LINE: usize = 4096;
 
-pub struct ParseContext<'path> {
+pub struct ParseContext<'a> {
     // stream
-    pub pathname: &'path PathBuf,
+    pub pathname: &'a PathBuf,
     pub current_directory: PathBuf,
-    pub journal: &'path Journal,
-    pub master: &'path Account,
+    pub journal: &'a Journal,
+    pub master: &'a Account,
     // pub scope: Scope
     // linebuf
     // line_beg_pos
@@ -30,12 +30,12 @@ pub struct ParseContext<'path> {
     // pub last: String
 }
 
-impl<'path> ParseContext<'path> {
+impl<'a> ParseContext<'a> {
     pub fn new(
-        pathname: &'path PathBuf,
+        pathname: &'a PathBuf,
         cwd: PathBuf,
-        journal: &'path Journal,
-        master: &'path Account,
+        journal: &'a Journal,
+        master: &'a Account,
     ) -> Self {
         ParseContext {
             pathname,
@@ -57,11 +57,11 @@ impl<'path> ParseContext<'path> {
     }
 }
 
-pub struct ParseContextStack<'path> {
-    parsing_context: Vec<ParseContext<'path>>,
+pub struct ParseContextStack<'a> {
+    parsing_context: Vec<ParseContext<'a>>,
 }
 
-impl<'path> ParseContextStack<'path> {
+impl<'a> ParseContextStack<'a> {
     pub fn new() -> Self {
         Self {
             parsing_context: vec![],
@@ -69,7 +69,7 @@ impl<'path> ParseContextStack<'path> {
     }
 
     /// Replaces the call to .push, when adding a new context.
-    pub fn add_new(&mut self, pathname: &'path PathBuf, journal: &'path Journal, master: &'path Account) {
+    pub fn add_new(&mut self, pathname: &'a PathBuf, journal: &'a Journal, master: &'a Account) {
         let cwd = env::current_dir().unwrap();
         let context = ParseContext::new(pathname, cwd, journal, master);
         self.parsing_context.push(context);

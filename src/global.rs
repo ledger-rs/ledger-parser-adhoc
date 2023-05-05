@@ -27,14 +27,14 @@ impl<'a> GlobalScope<'a> {
         todo!()
     }
 
-    pub fn execute_command_wrapper(&mut self, args: Vec<String>) {
+    pub fn execute_command_wrapper(&'a mut self, args: Vec<&str>) {
         // check if repl
     
         self.execute_command(args);
     }
     
     /// Line 196
-    fn execute_command(&mut self, args: Vec<String>) {
+    fn execute_command(&'a mut self, args: Vec<&str>) {
         // pre-command?
     
         // not pre-command

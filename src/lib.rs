@@ -35,12 +35,14 @@ pub fn main(args: Vec<&str>) {
     let mut global_scope = GlobalScope::new();
 
     // todo: read command arguments
+    let args = global_scope.read_command_arguments(args);
+
     // args = argv[i]
     // todo: if script handler
-    if !args.is_empty() {
-        // TODO: global_scope.execute
-        global_scope.execute_command_wrapper(args);
-    }
+    // TODO: borrowing issues
+    // if !args.is_empty() {
+    //     global_scope.execute_command_wrapper(args);
+    // }
 }
 
 #[cfg(test)]
@@ -50,7 +52,7 @@ mod tests {
 
     #[test]
     fn test_main() {
-        let args = vec!["b"];
+        let args = vec!["b", "-f", "tests/first.ledger"];
         main(args);
 
         assert!(false);

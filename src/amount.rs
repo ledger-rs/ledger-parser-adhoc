@@ -1,5 +1,3 @@
-use std::cell::Cell;
-
 use crate::{
     commodity::{self, Commodity},
     new_parser::ParsingContext,

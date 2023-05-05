@@ -5,7 +5,6 @@ use std::{
 
 use crate::{
     context::{ParseContext},
-    xact::Xact,
 };
 
 /**
@@ -15,17 +14,17 @@ use crate::{
 pub(crate) struct Instance<'a> {
     pub context_stack: &'a Vec<ParseContext<'a>>,
     pub context: &'a ParseContext<'a>,
-    pub reader: BufReader<File>,
+    // pub reader: BufReader<File>,
     //pub apply_stack: Vec<Application>
 }
 
 impl<'a> Instance<'a> {
-    pub fn new(context_stack: &Vec<ParseContext>, context: &ParseContext) -> Self {
+    pub fn new(context_stack: &'a Vec<ParseContext<'a>>, context: &'a ParseContext) -> Self {
         Self {
             context_stack,
             context,
             //reader: context.stream.get(),
-            reader: todo!(),
+            // reader: todo!(),
         }
     }
 

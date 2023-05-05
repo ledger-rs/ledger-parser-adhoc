@@ -66,10 +66,10 @@ impl<'a> GlobalScope<'a> {
 
         self.process_option(argument, value);
 
-        todo!()
+        todo!("return args?")
     }
 
     fn process_option(&self, whence: &str, value: &str) {
-        todo!()
+        // TODO: find where this is in Ledger.
     }
 }

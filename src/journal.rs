@@ -1,9 +1,4 @@
-use crate::{
-    account::Account,
-    context::{ParseContext},
-    textual::Instance,
-    xact::Xact,
-};
+use crate::{account::Account, context::ParseContext, textual::Instance, xact::Xact};
 
 /**
  * journal.cc + journal.h
@@ -72,17 +67,25 @@ mod tests {
 
     #[test]
     fn test_journal_read() {
-        let journal = Journal::new();
+        let pathname = &PathBuf::from("tests/first.ledger");
+        let journal = &Journal::new();
         let master = &Account::new();
-        // let mut context = ParseContextStack::new();
-        let mut context = vec![];
-        let pathname = PathBuf::from("tests/first.ledger");
-        //context.push(&path);
-        let parse_context = ParseContext::new(&pathname, &journal, master);
-        context.push(parse_context);
+        let context_stack = vec![ParseContext::new(pathname, journal, master)];
 
-        let actual = journal.read(&context);
+        let actual = journal.read(&context_stack);
 
         assert!(false);
+    }
+
+    #[test]
+    fn test_minimal() {
+        let pathname = &PathBuf::from("tests/minimal.ledger");
+        let journal = &Journal::new();
+        let master = &Account::new();
+        let context_stack = vec![ParseContext::new(pathname, journal, master)];
+
+        let actual = journal.read(&context_stack);
+
+        assert_eq!(1, actual);
     }
 }

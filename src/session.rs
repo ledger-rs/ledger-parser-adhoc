@@ -17,7 +17,7 @@ pub(crate) struct Session<'a> {
     pub data_files: Vec<PathBuf>,
 
     pub journal: Journal,
-    pub parsing_context: Vec<ParseContext<'a>>,
+    pub parse_context_stack: Vec<ParseContext<'a>>,
 }
 
 impl<'a> Session<'a> {
@@ -25,7 +25,7 @@ impl<'a> Session<'a> {
         Self {
             journal: Journal::new(),
             data_files: vec![],
-            parsing_context: vec!(),
+            parse_context_stack: vec!(),
         }
     }
 
@@ -71,7 +71,7 @@ impl<'a> Session<'a> {
                 let buffer = stdin().lines();
             } else {
                 let parse_context = ParseContext::new(pathname, &self.journal, account);
-                self.parsing_context.push(parse_context);
+                self.parse_context_stack.push(parse_context);
             }
 
             // todo: set journal
@@ -80,9 +80,9 @@ impl<'a> Session<'a> {
             // todo: set master
             // self.parsing_context.get_current().ma
             let parse_context = ParseContext::new(pathname, journal, account);
-            self.parsing_context.push(parse_context);
+            self.parse_context_stack.push(parse_context);
 
-            xact_count += self.journal.read(&self.parsing_context);
+            xact_count += self.journal.read(&self.parse_context_stack);
 
             // todo: remove from the parsing context
         }

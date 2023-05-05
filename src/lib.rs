@@ -34,8 +34,8 @@ pub fn main(args: Vec<&str>) {
     // todo: global_scope = new global_scope_t(envp);
     let mut global_scope = GlobalScope::new();
 
-    // todo: read command arguments
-    let args = global_scope.read_command_arguments(args);
+    // TODO: read command arguments
+    // let args = global_scope.read_command_arguments(args);
 
     // args = argv[i]
     // todo: if script handler

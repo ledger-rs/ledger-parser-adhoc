@@ -5,17 +5,19 @@ use crate::session::Session;
  */
 
 pub(crate) struct GlobalScope<'a> {
-    session_ptr: Box<Session<'a>>,
+    session_ptr: Session<'a>,
 }
 
-impl <'a> GlobalScope<'a> {
+impl<'a> GlobalScope<'a> {
     pub fn new() -> Self {
         GlobalScope {
-            session_ptr: Box::new(Session::new()),
+            session_ptr: Session::new(),
         }
 
-        // set_session_context
+        // todo: set_session_context()
+        // todo: create report object?
 
+        // Read the user's options, ...
         // if(!args_only)
         // read_environment_settings()
         // read_init()
@@ -24,29 +26,28 @@ impl <'a> GlobalScope<'a> {
     fn read_init(&self) {
         todo!()
     }
+
+    pub fn execute_command_wrapper(&mut self, args: Vec<String>) {
+        // check if repl
+    
+        self.execute_command(args);
+    }
+    
+    /// Line 196
+    fn execute_command(&mut self, args: Vec<String>) {
+        // pre-command?
+    
+        // not pre-command
+        // not repl
+        self.session_ptr.read_journal_files();
+
+        // report.normalize_options
+
+        // TODO: look for command
+
+    }
+    
+    fn look_for_command(&self) {
+
+    }
 }
-
-/// Equivalent of the global context.
-pub(crate) fn run() {
-    log::info!("Ledger starting");
-
-    let global_scope = GlobalScope::new();
-
-    // TODO: get command-line arguments
-    // args = argv[i]
-    let args = vec![];
-
-    // todo: if (!args.empty())
-    execute_command_wrapper(args);
-}
-
-fn execute_command_wrapper(args: Vec<String>) {
-    execute_command();
-}
-
-/// Line 196
-fn execute_command() {
-    // not pre-command
-    // not repl
-}
-

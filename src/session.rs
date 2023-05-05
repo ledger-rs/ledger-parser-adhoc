@@ -7,7 +7,7 @@
  * window would be a separate session. They are all owned by the global scope. 
  */
 
-use std::path::PathBuf;
+use std::path::{PathBuf, self};
 
 use crate::{account::Account, context::ParseContextStack, journal::Journal};
 
@@ -65,6 +65,9 @@ impl<'a> Session<'a> {
 
         for pathname in self.data_files.iter() {
             // todo: handle "-" and "/dev/stdin"
+            if pathname.to_str() == Some("-") || pathname.to_str() == Some("/dev/stdin") {
+                // TODO: read from stdin
+            }
             // else
             // self.parsing_context.push(pathname);
 
@@ -105,6 +108,7 @@ mod tests {
 2023-04-10 Supermarket
     Expenses:Food  20 EUR
     Assets:Cash
+
 "#;
         let mut s = Session::new();
         let actual = s.read_journal_files();
@@ -121,5 +125,24 @@ mod tests {
         // let actual = run(args);
 
         assert!(false)
+    }
+
+    // Try to use this simplest form for debugging.
+    #[test]
+    fn test_most_basic_balance_report() {
+        // no commodities; simple account structure
+        let tx = r#"
+2023-04-10 Supermarket
+    Expenses  20
+    Assets
+
+"#;
+        let session = Session::new();
+
+        // session.
+
+        // let actual = 
+
+        todo!("complete")
     }
 }

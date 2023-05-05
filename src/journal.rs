@@ -44,15 +44,15 @@ impl Journal {
     pub fn read(&self, context_stack: &Vec<ParseContext>) -> usize {
         let mut count: usize = 0;
 
-        let context = context_stack.last().expect("the last context");
-        count = read_textual(context_stack, context);
+        // let context = context_stack.last().expect("the last context");
+        count = read_textual(context_stack);
 
         count
     }
 }
 
-fn read_textual(context_stack: &Vec<ParseContext>, context: &ParseContext) -> usize {
-    let mut instance: Instance = Instance::new(context_stack, context);
+fn read_textual(context_stack: &Vec<ParseContext>) -> usize {
+    let mut instance: Instance = Instance::new(context_stack);
     // instance.apply_stack...
     instance.parse()
 }

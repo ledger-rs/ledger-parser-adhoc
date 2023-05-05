@@ -13,23 +13,24 @@ use crate::{
 
 pub(crate) struct Instance<'a> {
     pub context_stack: &'a Vec<ParseContext<'a>>,
-    pub context: &'a ParseContext<'a>,
+    // pub context: &'a ParseContext<'a>,
     // pub reader: BufReader<File>,
     //pub apply_stack: Vec<Application>
 }
 
 impl<'a> Instance<'a> {
-    pub fn new(context_stack: &'a Vec<ParseContext<'a>>, context: &'a ParseContext) -> Self {
+    pub fn new(context_stack: &'a Vec<ParseContext<'a>>) -> Self {
         Self {
             context_stack,
-            context,
+            // context,
             //reader: context.stream.get(),
             // reader: todo!(),
         }
     }
 
     pub fn parse(&self) -> usize {
-        log::info!("Parsing {:?}", self.context.pathname);
+        let context = self.context_stack.last().expect("The current context");
+        log::info!("Parsing {:?}", context.pathname);
 
         // self.context.linenum = 0;
 

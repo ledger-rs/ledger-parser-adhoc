@@ -22,8 +22,9 @@ pub struct Xact {
     // state
     // date: Option<Date>
     // date_aux:
-    note: Option<String>, // pos: Option<Position>
-                          // metadata: Option<string_map>
+    note: Option<String>, 
+    // pos: Option<Position>
+    // metadata: Option<string_map>
 }
 
 impl Xact {

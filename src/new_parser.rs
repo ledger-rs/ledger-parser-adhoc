@@ -393,7 +393,7 @@ mod tests {
     /// meant to be completed later and test the conversion scenario.
     #[test]
     fn test_conversion() {
-        let tx_str = r#"
+        let tx_str = r#";
 2023-04-10 Conversion
     Assets:CashEur  -20 EUR
     Assets:CashUsd  25 USD
